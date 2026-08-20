@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundamentos de la programación (5° Edición)</title>
+    <link rel="stylesheet" href="/static/css/Libro.css">
+</head>
+<body>
+    <main class="book-detail-layout">
+        <section class="Barra de desplasamiento">
+            
+        </section>
+        <section class="book-detail-card">
+            <div class="book-detail-text">
+                <p class="eyebrow">Fundamentos de la programación (5° Edición)</p>
+                <p class="book-author">Autor: Luis Joyanes Aguilar</p>
+                <p class="book-synopsis-title">Sinopsis</p>
+                <p class="book-synopsis">
+                    "Fundamentos de Programación" (5.ª edición) de Luis Joyanes Aguilar ofrece una guía completa para iniciarse en el desarrollo de software, cubriendo algoritmos, estructuras de datos y el paradigma orientado a objetos. La obra se organiza en tres bloques principales que avanzan desde la lógica básica y diagramas de flujo hasta la gestión de memoria y modelado POO con UML. El objetivo es formar el pensamiento computacional para resolver problemas lógicos, independientemente del lenguaje de programación a utilizar.
+                </p>
+            </div>
+            <div class="book-cover">
+                <img src="biblioteca_libros/portadas/Fundamentos de la programación 5.webp" alt="Portada del libro Fundamentos de la programación (5° Edición)">
+            </div>
+        </section>
+
+        <aside class="book-qr-card">
+            <div class="qr-box">
+                <img id="qrImage" alt="Código QR del libro" />
+            </div>
+            <div class="qr-card-text">
+                <p class="qr-title">Código del libro</p>
+                <div class="qr-actions">
+                    <button id="downloadQrBtn" class="qr-btn" disabled>Descargar QR</button>
+                </div>
+                <p> </p>  
+                <p class="qr-subtitle">Fuente del libro</p>
+                <button class="qr-url" onclick="window.open('https://www.bibliotecaParaguay.com/hsbsdjbckbdhbgcuybbsdchjbgcsjnch', '_blank')">https://www.bibliotecaParaguay.com/hsbsdjbckbdhbgcuybbsdchjbgcsjnch</button>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const bookUrl = encodeURIComponent('https://www.bibliotecaParaguay.com/hsbsdjbckbdhbgcuybbsdchjbgcsjnch');
+            const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${bookUrl}`;
+            const qrImage = document.getElementById('qrImage');
+            const downloadBtn = document.getElementById('downloadQrBtn');
+
+            if (!qrImage) return;
+
+            qrImage.crossOrigin = 'anonymous';
+            qrImage.src = qrSrc;
+
+            // Habilitar el botón de descarga cuando la imagen cargue
+            qrImage.addEventListener('load', () => {
+                if (downloadBtn) downloadBtn.disabled = false;
+            });
+
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = qrImage.naturalWidth || 260;
+                        canvas.height = qrImage.naturalHeight || 260;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(qrImage, 0, 0);
+                        const dataUrl = canvas.toDataURL('image/png');
+                        const a = document.createElement('a');
+                        a.href = dataUrl;
+                        a.download = 'qr-libro.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    } catch (err) {
+                        console.error('Error al descargar el QR:', err);
+                        // Fallback: abrir la imagen en nueva pestaña
+                        window.open(qrSrc, '_blank');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
