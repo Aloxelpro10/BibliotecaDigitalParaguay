@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Libros recomendados | Biblioteca Digital Paraguay</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="/">Biblioteca Digital Paraguay</a>
+    <nav class="main-nav" aria-label="Navegacion principal">
+      <a href="/recomendados" aria-current="page">Recomendados</a>
+      <a href="#seguimiento">Mi avance</a>
+    </nav>
+  </header>
+
+  <main class="library-layout">
+    <section class="intro-panel" aria-labelledby="recommended-title">
+      <div>
+        <p class="eyebrow">Coleccion inicial</p>
+        <h1 id="recommended-title">Libros recomendados</h1>
+        <p>
+          Esta pagina queda lista para cargar libros reales, portadas y PDFs. El progreso se guarda en este navegador con almacenamiento local.
+        </p>
+      </div>
+      <div class="reading-summary" id="seguimiento">
+        <span class="summary-number" data-summary-count>0</span>
+        <span>libros marcados como leidos</span>
+      </div>
+    </section>
+
+    <section class="filter-panel" aria-label="Filtros de busqueda">
+      <label class="search-field" for="buscar-libro">
+        <span>Buscar por nombre</span>
+        <input id="buscar-libro" type="search" data-buscador placeholder="Ejemplo: Matematica">
+      </label>
+
+      <label for="filtro-materia">
+        <span>Materia</span>
+        <select id="filtro-materia" data-filtro="materia">
+          <option value="todos">Todas</option>
+          <option value="historia">Historia</option>
+          <option value="literatura">Literatura</option>
+          <option value="ciencias">Ciencias</option>
+          <option value="matematica">Matematica</option>
+        </select>
+      </label>
+
+      <label for="filtro-grado">
+        <span>Grado</span>
+        <select id="filtro-grado" data-filtro="grado">
+          <option value="todos">Todos</option>
+          <option value="jar">Jardin</option>
+          <option value="pre">Pre-Escolar</option>
+          <option value="1">1 grado</option>
+          <option value="2">2 grado</option>
+          <option value="3">3 grado</option>
+          <option value="4">4 grado</option>
+          <option value="5">5 grado</option>
+          <option value="6">6 grado</option>
+          <option value="7">7 grado</option>
+          <option value="8">8 grado</option>
+          <option value="9">9 grado</option>
+          <option value="1a">1 curso</option>
+          <option value="2a">2 curso</option>
+          <option value="3a">3 curso</option>
+        </select>
+      </label>
+
+      <label for="filtro-anio">
+        <span>Año</span>
+        <select id="filtro-anio" data-filtro="anio">
+          <option value="todos">Todos</option>
+          <option value="2000">2000</option>
+          <option value="2001">2001</option>
+          <option value="2002">2002</option>
+          <option value="2003">2003</option>
+          <option value="2004">2004</option>
+          <option value="2005">2005</option>
+          <option value="2006">2006</option>
+          <option value="2007">2007</option>
+          <option value="2008">2008</option>
+          <option value="2009">2009</option>
+          <option value="2010">2010</option>
+          <option value="2011">2011</option>
+          <option value="2012">2012</option>
+          <option value="2013">2013</option>
+          <option value="2014">2014</option>
+          <option value="2015">2015</option>
+          <option value="2016">2016</option>
+          <option value="2017">2017</option>
+          <option value="2018">2018</option>
+          <option value="2019">2019</option>
+          <option value="2020">2020</option>
+          <option value="2021">2021</option>
+          <option value="2022">2022</option>
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026">2026</option>
+        </select>
+      </label>
+
+      <label for="filtro-idioma">
+        <span>Idioma</span>
+        <select id="filtro-idioma" data-filtro="idioma">
+          <option value="todos">Todos</option>
+          <option value="espanol">Español</option>
+          <option value="guarani">Guarani</option>
+          <option value="ingles">Ingles</option>
+        </select>
+      </label>
+
+      <button type="button" class="clear-button" data-limpiar-filtros>Limpiar</button>
+    </section>
+
+    <p class="filter-result" data-resultado-filtros>Mostrando todos los libros.</p>
+
+    <section class="book-grid" aria-label="Listado de libros recomendados">
+      <article
+        class="book-card"
+        data-book-id="Fundamentos-de-la-programacion"
+        data-titulo="Fundamentos de la Programacion"
+        data-materia="informatica"
+        data-grado="3a"
+        data-anio="2024"
+        data-idioma="espanol"
+      >
+        <img src="biblioteca_libros/portadas/Fundamentos de la programación 5.webp" alt="Portada del libro Fundamentos de la Programacion">
+        <div class="book-info">
+          <p class="book-category">Informática</p>
+          <h2>Fundamentos de la Programacion Vol. 5</h2>
+          <p>El 5° volumen aborda los conceptos fundamentales de la programación.</p>
+          <ul class="tag-list" aria-label="Etiquetas del libro">
+            <li>Programación</li>
+            <li>3 curso</li>
+            <li>2024</li>
+            <li>Español</li>
+          </ul>
+          <div class="book-actions">
+            <a class="secondary-button" href="templestes/Libro-Fundamentos-de-la-programacion.html">Ver detalles</a>
+            <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
+          </div>
+        </div>
+      </article>
+
+      <article
+        class="book-card"
+        data-book-id="literatura-paraguaya"
+        data-titulo="Literatura Paraguaya"
+        data-materia="literatura"
+        data-grado="2"
+        data-anio="2025"
+        data-idioma="espanol"
+      >
+        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Literatura Paraguaya">
+        <div class="book-info">
+          <p class="book-category">Literatura</p>
+          <h2>Literatura Paraguaya</h2>
+          <p>Lecturas seleccionadas para conocer autores, movimientos y textos nacionales.</p>
+          <ul class="tag-list" aria-label="Etiquetas del libro">
+            <li>Literatura</li>
+            <li>2 curso</li>
+            <li>2025</li>
+            <li>Español</li>
+          </ul>
+          <div class="book-actions">
+            <a class="secondary-button" href="/libros/pdfs/literatura-paraguaya.pdf">Abrir PDF</a>
+            <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
+          </div>
+        </div>
+      </article>
+
+      <article
+        class="book-card"
+        data-book-id="ciencias-basicas"
+        data-titulo="Ciencias Basicas"
+        data-materia="ciencias"
+        data-grado="9"
+        data-anio="2024"
+        data-idioma="espanol"
+      >
+        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Ciencias Basicas">
+        <div class="book-info">
+          <p class="book-category">Ciencias</p>
+          <h2>Ciencias Basicas</h2>
+          <p>Contenido introductorio para reforzar temas de biologia, fisica y quimica.</p>
+          <ul class="tag-list" aria-label="Etiquetas del libro">
+            <li>Ciencias</li>
+            <li>9 grado</li>
+            <li>2024</li>
+            <li>Español</li>
+          </ul>
+          <div class="book-actions">
+            <a class="secondary-button" href="/libros/pdfs/ciencias-basicas.pdf">Abrir PDF</a>
+            <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
+          </div>
+        </div>
+      </article>
+
+      <article
+        class="book-card featured-book"
+        data-book-id="matematica-prueba"
+        data-titulo="Matematica de Prueba"
+        data-materia="matematica"
+        data-grado="8"
+        data-anio="2026"
+        data-idioma="guarani"
+      >
+        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Matematica de Prueba">
+        <div class="book-info">
+          <p class="book-category">Libro de prueba</p>
+          <h2>Matematica de Prueba</h2>
+          <p>Ejemplo para probar el buscador y los filtros. Puedes copiar esta tarjeta para crear mas libros.</p>
+          <ul class="tag-list" aria-label="Etiquetas del libro">
+            <li>Matematica</li>
+            <li>8 grado</li>
+            <li>2026</li>
+            <li>Guarani</li>
+          </ul>
+          <div class="book-actions">
+            <a class="secondary-button" href="/libros/pdfs/matematica-prueba.pdf">Abrir PDF</a>
+            <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="/static/js/library.js"></script>
+</body>
+</html>
