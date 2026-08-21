@@ -62,6 +62,7 @@ function aplicarFiltros() {
 
     tarjeta.hidden = !debeMostrarse;
     tarjeta.classList.toggle("is-filtered-out", !debeMostrarse);
+    tarjeta.style.display = debeMostrarse ? "" : "none";
 
     if (debeMostrarse) {
       cantidadVisible += 1;
