@@ -1,6 +1,8 @@
 const CLAVE_SEGUIMIENTO = "bdp_read_books";
+const TIEMPO_BLOQUEO_MARCAR = 1000;
 
-const librosLeidos = new Set(JSON.parse(localStorage.getItem(CLAVE_SEGUIMIENTO) || "[]"));
+const librosGuardados = JSON.parse(localStorage.getItem(CLAVE_SEGUIMIENTO) || "[]");
+const librosLeidos = new Set(librosGuardados);
 const tarjetas = Array.from(document.querySelectorAll("[data-book-id]"));
 const contadorResumen = document.querySelector("[data-summary-count]");
 const buscador = document.querySelector("[data-buscador]");
@@ -18,7 +20,7 @@ function actualizarTarjeta(tarjeta) {
   const estaLeido = librosLeidos.has(idLibro);
 
   tarjeta.classList.toggle("is-read", estaLeido);
-  boton.textContent = estaLeido ? "Leido" : "Marcar leido";
+  boton.textContent = estaLeido ? "Leido" : "Marcar como leido";
   boton.setAttribute("aria-pressed", String(estaLeido));
 }
 
@@ -77,6 +79,8 @@ tarjetas.forEach((tarjeta) => {
   actualizarTarjeta(tarjeta);
 
   boton.addEventListener("click", () => {
+    if (boton.disabled) return;
+
     const idLibro = tarjeta.dataset.bookId;
 
     if (librosLeidos.has(idLibro)) {
@@ -88,6 +92,11 @@ tarjetas.forEach((tarjeta) => {
     guardarSeguimiento();
     actualizarTarjeta(tarjeta);
     actualizarResumen();
+
+    boton.disabled = true;
+    window.setTimeout(() => {
+      boton.disabled = false;
+    }, TIEMPO_BLOQUEO_MARCAR);
   });
 });
 
