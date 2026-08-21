@@ -7,7 +7,7 @@ const tarjetas = Array.from(document.querySelectorAll("[data-book-id]"));
 const contadorResumen = document.querySelector("[data-summary-count]");
 const buscador = document.querySelector("[data-buscador]");
 const filtros = Array.from(document.querySelectorAll("[data-filtro]"));
-const botonLimpiar = document.querySelector("[data-limpiar-filtros]");
+const botonFiltrar = document.querySelector("[data-aplicar-filtros]");
 const resultadoFiltros = document.querySelector("[data-resultado-filtros]");
 
 function guardarSeguimiento() {
@@ -32,17 +32,19 @@ function actualizarResumen() {
 
 function obtenerValorFiltro(nombreFiltro) {
   const filtro = filtros.find((selector) => selector.dataset.filtro === nombreFiltro);
-  return filtro ? filtro.value : "todos";
+  return filtro ? filtro.value.trim().toLowerCase() : "todos";
 }
 
 function coincideConFiltro(tarjeta, nombreFiltro) {
   const valorFiltro = obtenerValorFiltro(nombreFiltro);
-  return valorFiltro === "todos" || tarjeta.dataset[nombreFiltro] === valorFiltro;
+  const etiquetaLibro = (tarjeta.dataset[nombreFiltro] || "").trim().toLowerCase();
+
+  return valorFiltro === "todos" || etiquetaLibro === valorFiltro;
 }
 
 function coincideConBusqueda(tarjeta) {
   const textoBuscado = buscador ? buscador.value.trim().toLowerCase() : "";
-  const titulo = tarjeta.dataset.titulo.toLowerCase();
+  const titulo = (tarjeta.dataset.titulo || "").toLowerCase();
 
   return textoBuscado === "" || titulo.includes(textoBuscado);
 }
@@ -59,6 +61,7 @@ function aplicarFiltros() {
       coincideConFiltro(tarjeta, "idioma");
 
     tarjeta.hidden = !debeMostrarse;
+    tarjeta.classList.toggle("is-filtered-out", !debeMostrarse);
 
     if (debeMostrarse) {
       cantidadVisible += 1;
@@ -100,26 +103,8 @@ tarjetas.forEach((tarjeta) => {
   });
 });
 
-if (buscador) {
-  buscador.addEventListener("input", aplicarFiltros);
-}
-
-filtros.forEach((filtro) => {
-  filtro.addEventListener("change", aplicarFiltros);
-});
-
-if (botonLimpiar) {
-  botonLimpiar.addEventListener("click", () => {
-    if (buscador) {
-      buscador.value = "";
-    }
-
-    filtros.forEach((filtro) => {
-      filtro.value = "todos";
-    });
-
-    aplicarFiltros();
-  });
+if (botonFiltrar) {
+  botonFiltrar.addEventListener("click", aplicarFiltros);
 }
 
 actualizarResumen();
