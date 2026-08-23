@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="../static/css/Libro.css">
 </head>
 <body>
-    <main class="book-detail-layout">
-        <section class="Barra de desplasamiento">
+    <section class="Barra de desplasamiento">
             
-        </section>
+    </section>
+    <main class="book-detail-layout">
         <section class="book-detail-card">
             <div class="book-detail-text">
                 <p class="eyebrow">Fundamentos de la programación (5° Edición)</p>
@@ -26,6 +26,7 @@
         </section>
 
         <aside class="book-qr-card">
+            <button id="openQrBtn" class="qr-share-btn" type="button">Mostrar código QR</button>
             <div class="qr-box">
                 <img id="qrImage" alt="Código QR del libro" />
             </div>
@@ -36,51 +37,21 @@
                 </div>
                 <p> </p>  
                 <p class="qr-subtitle">Fuente del libro</p>
-                <button class="qr-url" onclick="window.open('https://www.bibliotecaParaguay.com/hsbsdjbckbdhbgcuybbsdchjbgcsjnch', '_blank')">https://www.bibliotecaParaguay.com/hsbsdjbckbdhbgcuybbsdchjbgcsjnch</button>
+                <button id="qrUrlBtn" class="qr-url" type="button"></button>
             </div>
         </aside>
     </main>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const bookUrl = encodeURIComponent('https://www.bibliotecaParaguay.com/hsbsdjbckbdhbgcuybbsdchjbgcsjnch');
-            const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${bookUrl}`;
-            const qrImage = document.getElementById('qrImage');
-            const downloadBtn = document.getElementById('downloadQrBtn');
-
-            if (!qrImage) return;
-
-            qrImage.crossOrigin = 'anonymous';
-            qrImage.src = qrSrc;
-
-            // Habilitar el botón de descarga cuando la imagen cargue
-            qrImage.addEventListener('load', () => {
-                if (downloadBtn) downloadBtn.disabled = false;
-            });
-
-            if (downloadBtn) {
-                downloadBtn.addEventListener('click', () => {
-                    try {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = qrImage.naturalWidth || 260;
-                        canvas.height = qrImage.naturalHeight || 260;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(qrImage, 0, 0);
-                        const dataUrl = canvas.toDataURL('image/png');
-                        const a = document.createElement('a');
-                        a.href = dataUrl;
-                        a.download = 'qr-libro.png';
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                    } catch (err) {
-                        console.error('Error al descargar el QR:', err);
-                        // Fallback: abrir la imagen en nueva pestaña
-                        window.open(qrSrc, '_blank');
-                    }
-                });
-            }
-        });
-    </script>
+    <dialog class="qr-modal" id="qrModal" aria-labelledby="qrModalTitle">
+        <div class="qr-box">
+            <img id="qrModalImage" alt="Código QR de esta página" />
+        </div>
+        <p class="qr-title" id="qrModalTitle">Código QR de esta página</p>
+        <div class="qr-modal-actions">
+            <button id="downloadModalQrBtn" class="qr-btn" type="button" disabled>Descargar QR</button>
+            <button id="closeQrBtn" class="qr-close-btn" type="button">Cerrar</button>
+        </div>
+    </dialog>
+    <script src="../static/js/book-detail.js"></script>
 </body>
 </html>
