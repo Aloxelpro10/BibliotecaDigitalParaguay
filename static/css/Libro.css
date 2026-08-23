@@ -152,6 +152,74 @@ body {
   white-space: normal;
 }
 
+.qr-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.qr-btn,
+.qr-share-btn,
+.qr-close-btn {
+  border: 0;
+  border-radius: 10px;
+  padding: 11px 16px;
+  color: #ffffff;
+  background: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.qr-btn:hover,
+.qr-share-btn:hover,
+.qr-close-btn:hover {
+  background: var(--accent-dark);
+}
+
+.qr-btn:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.qr-share-btn {
+  display: none;
+  width: 100%;
+}
+
+.qr-modal {
+  width: min(100% - 32px, 380px);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.qr-modal::backdrop {
+  background: rgba(23, 33, 43, 0.6);
+}
+
+.qr-modal .qr-box {
+  width: min(100%, 280px);
+  margin: 0 auto 18px;
+}
+
+.qr-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.qr-close-btn {
+  color: var(--ink);
+  background: var(--line);
+}
+
 @media (max-width: 900px) {
   .book-detail-layout {
     grid-template-columns: 1fr;
@@ -197,5 +265,23 @@ body {
 
   .qr-box img {
     border-radius: 12px;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .book-qr-card {
+    display: block;
+  }
+
+  .book-qr-card > .qr-box,
+  .qr-card-text > .qr-title,
+  .qr-card-text > .qr-actions,
+  .qr-card-text > p:not(.qr-subtitle) {
+    display: none;
+  }
+
+  .qr-share-btn {
+    display: block;
+    margin-bottom: 18px;
   }
 }
