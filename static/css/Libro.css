@@ -23,6 +23,14 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+body.library-page-bg {
+  background-image: url("../img/fondo_pag.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
 .book-detail-layout {
   width: min(1200px, calc(100% - 32px));
   margin: 32px auto;
@@ -249,11 +257,18 @@ body {
   }
 
   .book-detail-card {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 250px);
     gap: 18px;
+  }
+
+  .book-detail-text {
+    max-width: 100%;
   }
 
   .book-cover img {
     border-radius: 16px;
+    /* 🔧 AJUSTAR TAMAÑO DE IMAGEN EN MÓVIL: Modifica estos valores para cambiar el ancho/alto de la imagen en modo compacto */
+    max-height: 1000px;
   }
 
   .qr-box {
