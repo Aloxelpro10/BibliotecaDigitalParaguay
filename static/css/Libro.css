@@ -257,7 +257,7 @@ body.library-page-bg {
   }
 
   .book-detail-card {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 200px);
+    grid-template-columns: minmax(0, 2fr) minmax(0, 100px);
     gap: 18px;
   }
 
