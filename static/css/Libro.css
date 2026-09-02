@@ -56,6 +56,15 @@ body.library-page-bg {
   align-items: center;
 }
 
+/* Control de visibilidad por defecto (Escritorio) */
+.book-cover-mobile {
+  display: none;
+}
+
+.book-cover-desktop {
+  display: block;
+}
+
 .book-detail-text h1 {
   margin: 0 0 16px;
   font-size: clamp(2rem, 4vw, 3.4rem);
@@ -140,7 +149,6 @@ body.library-page-bg {
   color: var(--ink);
   font-size: 0.95rem;
 }
-
 
 .qr-subtitle {
   color: var(--muted);
@@ -256,19 +264,35 @@ body.library-page-bg {
     border-radius: 20px;
   }
 
+  /* Cambios para Móvil: Alternar visibilidad de portadas */
+  .book-cover-desktop {
+    display: none !important;
+  }
+
   .book-detail-card {
-    grid-template-columns: minmax(0, 2fr) minmax(0, 100px);
-    gap: 18px;
+    display: block;
+  }
+
+  .book-detail-card::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  .book-cover-mobile {
+    display: block;
+    float: right;
+    width: 115px;
+    margin: 4px 0 10px 14px;
+  }
+
+  .book-cover-mobile img {
+    border-radius: 14px;
+    max-height: none;
   }
 
   .book-detail-text {
     max-width: 100%;
-  }
-
-  .book-cover img {
-    border-radius: 16px;
-    /* 🔧 AJUSTAR TAMAÑO DE IMAGEN EN MÓVIL: Modifica estos valores para cambiar el ancho/alto de la imagen en modo compacto */
-    max-height: 1000px;
   }
 
   .qr-box {
