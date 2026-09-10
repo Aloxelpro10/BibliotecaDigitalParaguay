@@ -9,6 +9,76 @@ document.addEventListener("DOMContentLoaded", () => {
   const openQrBtn = document.getElementById("openQrBtn");
   const closeQrBtn = document.getElementById("closeQrBtn");
   const qrUrlBtn = document.getElementById("qrUrlBtn");
+  const favoriteButton = document.querySelector(".favorite-button");
+
+  const obtenerIdLibro = () => {
+    const textoTitulo = document.querySelector(".eyebrow")?.textContent?.trim() || document.title.trim();
+    return (textoTitulo || "libro")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "libro";
+  };
+
+  const obtenerFavoritos = () => {
+    try {
+      return JSON.parse(localStorage.getItem("bdp_favorite_books") || "[]");
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const guardarFavoritos = (libros) => {
+    localStorage.setItem("bdp_favorite_books", JSON.stringify(libros));
+  };
+
+  const actualizarEstadoFavorito = () => {
+    if (!favoriteButton) return;
+
+    const favoritos = obtenerFavoritos();
+    const bookId = obtenerIdLibro();
+    const estaFavorito = favoritos.some((libro) => libro.id === bookId);
+
+    favoriteButton.classList.toggle("is-favorite", estaFavorito);
+    favoriteButton.textContent = estaFavorito ? "Favorito ✓" : "Agregar a favoritos";
+    favoriteButton.setAttribute("aria-pressed", String(estaFavorito));
+  };
+
+  if (favoriteButton) {
+    favoriteButton.addEventListener("click", () => {
+      const favoritos = obtenerFavoritos();
+      const titulo = document.querySelector(".eyebrow")?.textContent?.trim() || document.title.trim();
+      const descripcion = "Libro guardado en favoritos.";
+      const image = document.querySelector(".book-cover img")?.src || "";
+      const libro = {
+        id: obtenerIdLibro(),
+        titulo,
+        categoria: "Informática",
+        materia: "informatica",
+        grado: "3a",
+        anio: "2024",
+        idioma: "espanol",
+        descripcion,
+        imagen: image,
+        href: pageUrl,
+        origen: "detalle"
+      };
+
+      const indice = favoritos.findIndex((item) => item.id === libro.id);
+
+      if (indice >= 0) {
+        favoritos.splice(indice, 1);
+      } else {
+        favoritos.unshift(libro);
+      }
+
+      guardarFavoritos(favoritos);
+      actualizarEstadoFavorito();
+    });
+
+    actualizarEstadoFavorito();
+  }
 
   if (!qrImage) return;
 
