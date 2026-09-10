@@ -7,8 +7,12 @@
     <link rel="stylesheet" href="../static/css/Libro.css">
 </head>
 <body class="library-page-bg">
-    <section class="Barra de desplasamiento">
-            
+    <section class="toolbar" aria-label="Navegación de regreso">
+        <a href="../Inicio.html" class="back-button" aria-label="Volver a recomendados">
+            <img src="../static/img/Back-button.png" alt="Botón volver a recomendados">
+        </a>
+        <h2 class="Title-page">Biblioteca Paraguay</h2>
+        <img src="../static/img/logo-de-pagina.png" alt="logo-de-pagina" class="logo-de-pagina">
     </section>
     <main class="book-detail-layout">
         <section class="book-detail-card">
@@ -49,6 +53,9 @@
             </div>
         </aside>
     </main>
+    <div class="button-navegation">
+        <button class="favorite-button" type="button" aria-pressed="false">Agregar a favoritos</button>
+    </div>
 
     <dialog class="qr-modal" id="qrModal" aria-labelledby="qrModalTitle">
         <div class="qr-box">
