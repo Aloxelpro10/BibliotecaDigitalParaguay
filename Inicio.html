@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Libros recomendados | Biblioteca Digital Paraguay</title>
+  <title>Biblioteca Digital Paraguay</title>
   <link rel="stylesheet" href="static/css/styles.css">
 </head>
 <body class="library-page-bg">
   <header class="site-header">
     <a class="brand" href="/">Biblioteca Digital Paraguay</a>
     <nav class="main-nav" aria-label="Navegacion principal">
-      <a href="/recomendados" aria-current="page">Recomendados</a>
+      <a href="/Inicio.html" aria-current="page">Inicio</a>
+      <a href="/favoritos.html" aria-current="page">Ver Favoritos</a>
       <a href="#seguimiento">Mi avance</a>
     </nav>
   </header>
@@ -19,9 +20,9 @@
     <section class="intro-panel" aria-labelledby="recommended-title">
       <div>
         <p class="eyebrow">Coleccion inicial</p>
-        <h1 id="recommended-title">Libros recomendados</h1>
+        <h1 id="recommended-title">Libros disponibles</h1>
         <p>
-          Esta pagina queda lista para cargar libros reales, portadas y PDFs. El progreso se guarda en este navegador con almacenamiento local.
+          En esta pagina encontraran varios libros de distintas materias y grados, con el fin de facilitar el acceso a la información y fomentar la lectura.
         </p>
       </div>
       <div class="reading-summary" id="seguimiento">
@@ -141,6 +142,7 @@
           <div class="book-actions">
             <a class="secondary-button" href="templestes/Libro-Fundamentos-de-la-programacion.html">Ver detalles</a>
             <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
+            <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
           </div>
         </div>
       </article>
@@ -168,6 +170,7 @@
           <div class="book-actions">
             <a class="secondary-button" href="/libros/pdfs/literatura-paraguaya.pdf">Abrir PDF</a>
             <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
+            <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
           </div>
         </div>
       </article>
@@ -195,6 +198,7 @@
           <div class="book-actions">
             <a class="secondary-button" href="/libros/pdfs/ciencias-basicas.pdf">Abrir PDF</a>
             <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
+            <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
           </div>
         </div>
       </article>
@@ -222,6 +226,7 @@
           <div class="book-actions">
             <a class="secondary-button" href="/libros/pdfs/matematica-prueba.pdf">Abrir PDF</a>
             <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
+            <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
           </div>
         </div>
       </article>
