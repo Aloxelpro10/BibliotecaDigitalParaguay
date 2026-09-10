@@ -35,7 +35,7 @@ La pagina de recomendados guarda los libros marcados como leidos usando almacena
 
 ## Etiquetas y busqueda
 
-Cada libro de `templestes/recomendados.html` puede filtrarse con estos atributos:
+Cada libro de `templestes/Inicio.html` puede filtrarse con estos atributos:
 
 - `data-titulo`: nombre usado por el buscador.
 - `data-materia`: materia del libro.
