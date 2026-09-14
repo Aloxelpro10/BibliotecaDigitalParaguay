@@ -29,11 +29,28 @@
 
     <div class="favorites-toolbar">
       <a class="secondary-button" href="Inicio.html">Volver al Inicio</a>
-      <button type="button" class="clear-button" id="clear-favorites">Limpiar favoritos</button>
+      <button type="button" class="clear-button" id="toggle-favorite-selection">Eliminar de favoritos</button>
+      <label class="favorite-select-all" id="select-all-wrapper" hidden>
+        <input id="select-all-favorites" type="checkbox">
+        <span>Seleccionar todo</span>
+      </label>
+      <button type="button" class="clear-button" id="delete-selected-favorites" hidden>Eliminar</button>
     </div>
 
     <section id="favorites-list" class="favorites-list" aria-live="polite"></section>
   </main>
+
+  <div id="favorites-confirm-modal" class="favorites-confirm-modal" hidden>
+    <div class="favorites-confirm-backdrop" data-close-modal="true"></div>
+    <div class="favorites-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="favorites-confirm-title">
+      <h2 id="favorites-confirm-title">Confirmación</h2>
+      <p id="favorites-confirm-message">¿Estas seguro?</p>
+      <div class="favorites-confirm-actions">
+        <button type="button" class="secondary-button" id="favorites-confirm-cancel">Cancelar</button>
+        <button type="button" class="clear-button" id="favorites-confirm-accept">Aceptar</button>
+      </div>
+    </div>
+  </div>
 
   <script src="static/js/favoritos.js"></script>
 </body>
