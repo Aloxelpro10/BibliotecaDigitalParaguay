@@ -1,0 +1,49 @@
+/* ═══ Lector PDF Universal ═══ */
+.pdf-reader-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  flex-direction: column;
+}
+
+.pdf-reader-overlay.activo {
+  display: flex;
+}
+
+.pdf-reader-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e293b;
+  color: #fff;
+  padding: 10px 20px;
+  flex-shrink: 0;
+}
+
+.pdf-reader-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.pdf-reader-close {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.pdf-reader-close:hover {
+  background: #dc2626;
+}
+
+.pdf-reader-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+  background: #fff;
+}
