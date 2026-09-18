@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fundamentos de la programación (5° Edición)</title>
     <link rel="stylesheet" href="../static/css/Libro.css">
+    <link rel="stylesheet" href="../static/css/lector-pdf.css">
 </head>
-<body class="library-page-bg">
+<body class="library-page-bg" data-book-id="Fundamentos-de-la-programacion">
     <section class="toolbar" aria-label="Navegación de regreso">
         <a href="../Inicio.html" class="back-button" aria-label="Volver a recomendados">
             <img src="../static/img/Back-button.png" alt="Botón volver a recomendados">
@@ -55,6 +56,8 @@
     </main>
     <div class="button-navegation">
         <button class="favorite-button" type="button" aria-pressed="false">Agregar a favoritos</button>
+        <button class="open-book-button" type="button" data-pdf="informatica/Fundamentos%20de%20programacio%CC%81n%205.pdf">Leer</button>
+        <a href="https://biblioteca-r2.williandesiderio3.workers.dev/informatica/Fundamentos%20de%20programacio%CC%81n%205.pdf?download=1">Descargar</a>
     </div>
 
     <dialog class="qr-modal" id="qrModal" aria-labelledby="qrModalTitle">
@@ -67,6 +70,9 @@
             <button id="closeQrBtn" class="qr-close-btn" type="button">Cerrar</button>
         </div>
     </dialog>
+
+    <!-- Visor PDF universal (se inyecta automáticamente, no necesitas copiarlo en cada página) -->
+    <script src="../static/js/lector-pdf.js"></script>
     <script src="../static/js/book-detail.js"></script>
 </body>
 </html>
