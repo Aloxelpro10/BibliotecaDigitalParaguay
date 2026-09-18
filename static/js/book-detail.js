@@ -8,29 +8,89 @@ document.addEventListener("DOMContentLoaded", () => {
   const downloadModalBtn = document.getElementById("downloadModalQrBtn");
   const openQrBtn = document.getElementById("openQrBtn");
   const closeQrBtn = document.getElementById("closeQrBtn");
-  const qrUrlBtn = document.getElementById("qrUrlBtn");
   const favoriteButton = document.querySelector(".favorite-button");
 
-  const obtenerIdLibro = () => {
-    const textoTitulo = document.querySelector(".eyebrow")?.textContent?.trim() || document.title.trim();
-    return (textoTitulo || "libro")
+  const normalizarIdLibro = (valor) => {
+    const texto = String(valor || "")
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") || "libro";
+      .replace(/^-+|-+$/g, "");
+
+    return texto || "libro";
+  };
+
+  const normalizarFavoritos = (libros) => {
+    const vistos = new Set();
+
+    return (Array.isArray(libros) ? libros : []).reduce((resultado, libro) => {
+      const id = normalizarIdLibro(libro?.id || libro?.titulo || "");
+
+      if (!vistos.has(id)) {
+        vistos.add(id);
+        resultado.push({ ...libro, id });
+      }
+
+      return resultado;
+    }, []);
+  };
+
+  const obtenerIdLibro = () => {
+    const idDesdeBody = document.body?.dataset?.bookId || "";
+    const textoTitulo = document.querySelector(".eyebrow")?.textContent?.trim() || document.title.trim();
+    return normalizarIdLibro(idDesdeBody || textoTitulo);
+  };
+
+  const buscarLibroEnInicio = (idLibro) => {
+    try {
+      const catalogo = JSON.parse(localStorage.getItem("bdp_book_catalog") || "{}");
+      const libroCatalogado = catalogo[idLibro];
+
+      if (libroCatalogado) {
+        return {
+          ...libroCatalogado,
+          id: normalizarIdLibro(libroCatalogado.id || idLibro),
+          descripcion: libroCatalogado.descripcion || "Libro guardado en favoritos."
+        };
+      }
+    } catch (error) {
+      // Ignora error y usa el fallback del detalle.
+    }
+
+    const tarjetasInicio = Array.from(document.querySelectorAll(".book-card"));
+    const tarjeta = tarjetasInicio.find((item) => normalizarIdLibro(item.dataset.bookId || item.dataset.titulo || "") === idLibro);
+
+    if (!tarjeta) return null;
+
+    const imageElement = tarjeta.querySelector("img");
+    const titulo = tarjeta.dataset.titulo || tarjeta.querySelector("h2")?.textContent?.trim() || "Sin título";
+
+    return {
+      id: normalizarIdLibro(idLibro || tarjeta.dataset.bookId || titulo),
+      titulo,
+      categoria: tarjeta.querySelector(".book-category")?.textContent?.trim() || "",
+      materia: tarjeta.dataset.materia || "",
+      grado: tarjeta.dataset.grado || "",
+      anio: tarjeta.dataset.anio || "",
+      idioma: tarjeta.dataset.idioma || "",
+      descripcion: tarjeta.querySelector("p")?.textContent?.trim() || "",
+      imagen: imageElement ? imageElement.src : "",
+      href: tarjeta.querySelector("a")?.href || pageUrl,
+      origen: "recomendados"
+    };
   };
 
   const obtenerFavoritos = () => {
     try {
-      return JSON.parse(localStorage.getItem("bdp_favorite_books") || "[]");
+      return normalizarFavoritos(JSON.parse(localStorage.getItem("bdp_favorite_books") || "[]"));
     } catch (error) {
       return [];
     }
   };
 
   const guardarFavoritos = (libros) => {
-    localStorage.setItem("bdp_favorite_books", JSON.stringify(libros));
+    localStorage.setItem("bdp_favorite_books", JSON.stringify(normalizarFavoritos(libros)));
   };
 
   const actualizarEstadoFavorito = () => {
@@ -38,7 +98,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const favoritos = obtenerFavoritos();
     const bookId = obtenerIdLibro();
-    const estaFavorito = favoritos.some((libro) => libro.id === bookId);
+    const estaFavorito = favoritos.some((libro) => normalizarIdLibro(libro.id) === bookId);
 
     favoriteButton.classList.toggle("is-favorite", estaFavorito);
     favoriteButton.textContent = estaFavorito ? "Favorito ✓" : "Agregar a favoritos";
@@ -47,33 +107,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (favoriteButton) {
     favoriteButton.addEventListener("click", () => {
-      const favoritos = obtenerFavoritos();
+      const idLibro = obtenerIdLibro();
+      const libroDesdeInicio = buscarLibroEnInicio(idLibro);
       const titulo = document.querySelector(".eyebrow")?.textContent?.trim() || document.title.trim();
-      const descripcion = "Libro guardado en favoritos.";
       const image = document.querySelector(".book-cover img")?.src || "";
-      const libro = {
-        id: obtenerIdLibro(),
+
+      const libro = libroDesdeInicio || {
+        id: idLibro,
         titulo,
-        categoria: "Informática",
-        materia: "informatica",
-        grado: "3a",
-        anio: "2024",
-        idioma: "espanol",
-        descripcion,
+        descripcion: "Libro guardado en favoritos.",
         imagen: image,
-        href: pageUrl,
-        origen: "detalle"
+        href: pageUrl
       };
 
-      const indice = favoritos.findIndex((item) => item.id === libro.id);
-
-      if (indice >= 0) {
-        favoritos.splice(indice, 1);
+      if (window.bdpToggleFavorito) {
+        window.bdpToggleFavorito(idLibro, libro);
       } else {
-        favoritos.unshift(libro);
+        const favoritos = obtenerFavoritos();
+        const indice = favoritos.findIndex((item) => normalizarIdLibro(item.id) === idLibro);
+
+        if (indice >= 0) {
+          favoritos.splice(indice, 1);
+        } else {
+          favoritos.unshift(libro);
+        }
+
+        guardarFavoritos(favoritos);
       }
 
-      guardarFavoritos(favoritos);
       actualizarEstadoFavorito();
     });
 
@@ -117,11 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
     image.src = qrSrc;
     image.addEventListener("load", markQrAsReady, { once: true });
   });
-
-  if (qrUrlBtn) {
-    qrUrlBtn.textContent = pageUrl;
-    qrUrlBtn.addEventListener("click", () => window.open(pageUrl, "_blank", "noopener,noreferrer"));
-  }
 
   if (downloadBtn) downloadBtn.addEventListener("click", downloadQr);
   if (downloadModalBtn) downloadModalBtn.addEventListener("click", downloadQr);
