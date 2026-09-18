@@ -408,15 +408,64 @@ a {
 .favorites-toolbar {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 22px;
+}
+
+.favorite-select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(18, 61, 99, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--surface);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.favorite-select-all input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--surface);
 }
 
 .favorites-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+}
+
+.favorite-card {
+  position: relative;
+}
+
+.favorite-select-option {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 18px rgba(18, 61, 99, 0.18);
+}
+
+.favorite-select {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--surface);
+}
+
+.favorite-card .favorite-select-option:has(.favorite-select:not([hidden])) {
+  display: inline-flex;
 }
 
 .favorite-card {
@@ -473,6 +522,69 @@ a {
 .favorites-empty h2 {
   margin-top: 0;
   font-size: 1.5rem;
+}
+
+.favorites-confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  place-items: center;
+}
+
+.favorites-confirm-modal:not([hidden]) {
+  display: grid;
+}
+
+.favorites-confirm-modal[hidden] {
+  display: none !important;
+}
+
+.favorites-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 20, 32, 0.55);
+}
+
+.favorites-confirm-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 30px, 420px);
+  padding: 22px 20px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 22px 50px rgba(18, 61, 99, 0.35);
+  color: #ffffff;
+  text-align: center;
+}
+
+.favorites-confirm-dialog h2 {
+  margin: 0 0 12px;
+  font-size: 1.4rem;
+  color: #ffffff;
+}
+
+.favorites-confirm-dialog p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+}
+
+.favorites-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.favorites-confirm-actions .secondary-button,
+.favorites-confirm-actions .clear-button {
+  min-width: 120px;
+}
+
+#delete-selected-favorites {
+  min-width: 150px;
 }
 
 @media (max-width: 850px) {
