@@ -1,6 +1,33 @@
 const CLAVE_SEGUIMIENTO = "bdp_read_books";
 const CLAVE_FAVORITOS = "bdp_favorite_books";
+const CLAVE_CATALOGO_LIBROS = "bdp_book_catalog";
 const TIEMPO_BLOQUEO_MARCAR = 1000;
+
+const normalizarIdLibro = (valor) => {
+  const texto = String(valor || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return texto || "libro";
+};
+
+const normalizarFavoritos = (libros) => {
+  const vistos = new Set();
+
+  return (Array.isArray(libros) ? libros : []).reduce((resultado, libro) => {
+    const id = normalizarIdLibro(libro?.id || libro?.titulo || "");
+
+    if (!vistos.has(id)) {
+      vistos.add(id);
+      resultado.push({ ...libro, id });
+    }
+
+    return resultado;
+  }, []);
+};
 
 const librosGuardados = JSON.parse(localStorage.getItem(CLAVE_SEGUIMIENTO) || "[]");
 const librosLeidos = new Set(librosGuardados);
@@ -16,30 +43,78 @@ function guardarSeguimiento() {
 }
 
 function guardarFavoritos(librosFavoritos) {
-  localStorage.setItem(CLAVE_FAVORITOS, JSON.stringify(librosFavoritos));
+  localStorage.setItem(CLAVE_FAVORITOS, JSON.stringify(normalizarFavoritos(librosFavoritos)));
 }
 
 function obtenerFavoritos() {
   try {
-    return JSON.parse(localStorage.getItem(CLAVE_FAVORITOS) || "[]");
+    return normalizarFavoritos(JSON.parse(localStorage.getItem(CLAVE_FAVORITOS) || "[]"));
   } catch (error) {
     return [];
   }
 }
 
+function guardarCatalogoLibros(catalogo) {
+  localStorage.setItem(CLAVE_CATALOGO_LIBROS, JSON.stringify(catalogo));
+}
+
+function obtenerCatalogoLibros() {
+  try {
+    return JSON.parse(localStorage.getItem(CLAVE_CATALOGO_LIBROS) || "{}");
+  } catch (error) {
+    return {};
+  }
+}
+
+function sincronizarCatalogoDesdeInicio() {
+  const catalogo = {};
+
+  tarjetas.forEach((tarjeta) => {
+    const datosLibro = construirDatosLibro(tarjeta);
+    catalogo[normalizarIdLibro(datosLibro.id)] = datosLibro;
+  });
+
+  guardarCatalogoLibros(catalogo);
+}
+
+function alternarFavoritoPorId(bookId, datosLibro) {
+  const idObjetivo = normalizarIdLibro(bookId || datosLibro?.id || "");
+  const catalogo = obtenerCatalogoLibros();
+  const datosBase = catalogo[idObjetivo] || datosLibro || {};
+  const favoritos = obtenerFavoritos();
+  const indice = favoritos.findIndex((libro) => normalizarIdLibro(libro.id) === idObjetivo);
+
+  if (indice >= 0) {
+    favoritos.splice(indice, 1);
+  } else {
+    favoritos.unshift({
+      ...datosBase,
+      id: idObjetivo,
+      titulo: datosBase?.titulo || datosLibro?.titulo || "Sin título",
+      descripcion: datosBase?.descripcion || datosLibro?.descripcion || "Libro guardado en favoritos."
+    });
+  }
+
+  guardarFavoritos(favoritos);
+  return obtenerFavoritos();
+}
+
+window.bdpToggleFavorito = alternarFavoritoPorId;
+
 function construirDatosLibro(tarjeta) {
   const imageElement = tarjeta.querySelector("img");
   const titulo = tarjeta.dataset.titulo || tarjeta.querySelector("h2")?.textContent?.trim() || "Sin título";
+  const descripcion = tarjeta.querySelector(".book-info p:not(.book-category)")?.textContent?.trim() || "";
 
   return {
-    id: tarjeta.dataset.bookId,
+    id: normalizarIdLibro(tarjeta.dataset.bookId || titulo),
     titulo,
     categoria: tarjeta.querySelector(".book-category")?.textContent?.trim() || "",
     materia: tarjeta.dataset.materia || "",
     grado: tarjeta.dataset.grado || "",
     anio: tarjeta.dataset.anio || "",
     idioma: tarjeta.dataset.idioma || "",
-    descripcion: tarjeta.querySelector("p")?.textContent?.trim() || "",
+    descripcion,
     imagen: imageElement ? imageElement.src : "",
     href: tarjeta.querySelector("a")?.href || window.location.href,
     origen: "recomendados"
@@ -51,7 +126,8 @@ function actualizarEstadoFavorito(tarjeta) {
   if (!botonFavorito) return;
 
   const favoritos = obtenerFavoritos();
-  const estaFavorito = favoritos.some((libro) => libro.id === tarjeta.dataset.bookId);
+  const idActual = normalizarIdLibro(tarjeta.dataset.bookId || tarjeta.dataset.titulo || "");
+  const estaFavorito = favoritos.some((libro) => normalizarIdLibro(libro.id) === idActual);
 
   botonFavorito.classList.toggle("is-favorite", estaFavorito);
   botonFavorito.textContent = estaFavorito ? "Favorito ✓" : "Añadir a Favoritos";
@@ -152,17 +228,8 @@ tarjetas.forEach((tarjeta) => {
 
   if (botonFavorito) {
     botonFavorito.addEventListener("click", () => {
-      const favoritos = obtenerFavoritos();
       const datosLibro = construirDatosLibro(tarjeta);
-      const indice = favoritos.findIndex((libro) => libro.id === datosLibro.id);
-
-      if (indice >= 0) {
-        favoritos.splice(indice, 1);
-      } else {
-        favoritos.unshift(datosLibro);
-      }
-
-      guardarFavoritos(favoritos);
+      alternarFavoritoPorId(datosLibro.id, datosLibro);
       actualizarEstadoFavorito(tarjeta);
     });
   }
@@ -172,5 +239,4 @@ if (botonFiltrar) {
   botonFiltrar.addEventListener("click", aplicarFiltros);
 }
 
-actualizarResumen();
-aplicarFiltros();
+  sincronizarCatalogoDesdeInicio();
