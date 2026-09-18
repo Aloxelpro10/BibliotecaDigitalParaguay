@@ -306,6 +306,75 @@ body.library-page-bg {
   background: var(--line);
 }
 
+.button-navegation {
+  width: min(1200px, calc(100% - 32px));
+  margin: 0 auto 36px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px 18px 0;
+}
+
+.button-navegation button,
+.button-navegation a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 170px;
+  min-height: 52px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 16px;
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(11, 28, 48, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.button-navegation button:hover,
+.button-navegation a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(11, 28, 48, 0.24);
+  filter: brightness(1.04);
+}
+
+.button-navegation button:active,
+.button-navegation a:active {
+  transform: translateY(0);
+}
+
+.button-navegation .favorite-button {
+  color: #122033;
+  background: linear-gradient(135deg, #f9c74f 0%, #f4a261 100%);
+}
+
+.button-navegation .open-book-button {
+  color: #edf7ff;
+  background: linear-gradient(135deg, #0ea5c7 0%, #1d9bf0 100%);
+}
+
+.button-navegation a {
+  color: #f8fffd;
+  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+}
+
+.button-navegation .favorite-button.is-favorite {
+  background: linear-gradient(135deg, #ffd166 0%, #ff9f43 100%);
+  box-shadow: 0 12px 26px rgba(244, 162, 97, 0.35);
+}
+
+.button-navegation .favorite-button.is-favorite,
+.button-navegation .open-book-button,
+.button-navegation a {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
 @media (max-width: 900px) {
   .book-detail-layout {
     grid-template-columns: 1fr;
