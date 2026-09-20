@@ -239,4 +239,235 @@ if (botonFiltrar) {
   botonFiltrar.addEventListener("click", aplicarFiltros);
 }
 
+const formularioPedido = document.querySelector("#pedido-subida-form");
+const estadoPedido = document.querySelector("#pedido-status");
+const botonCorreoAviso = document.querySelector("[data-open-email-request]");
+const DESTINO_CORREO = "juaneolearybibliotecadigital@gmail.com";
+
+function crearEnlaceCorreo({ destinatario = DESTINO_CORREO, asunto = "", cuerpo = "" } = {}) {
+  const url = new URL(`mailto:${destinatario}`);
+
+  if (asunto) {
+    url.searchParams.set("subject", asunto);
+  }
+
+  if (cuerpo) {
+    url.searchParams.set("body", cuerpo);
+  }
+
+  return url.toString();
+}
+
+function abrirCorreo({ destinatario = DESTINO_CORREO, asunto = "", cuerpo = "" } = {}) {
+  const mailtoLink = crearEnlaceCorreo({ destinatario, asunto, cuerpo });
+  const gmailLink = new URL("https://mail.google.com/mail/");
+  gmailLink.searchParams.set("view", "cm");
+  gmailLink.searchParams.set("fs", "1");
+  gmailLink.searchParams.set("to", destinatario);
+
+  if (asunto) {
+    gmailLink.searchParams.set("su", asunto);
+  }
+
+  if (cuerpo) {
+    gmailLink.searchParams.set("body", cuerpo);
+  }
+
+  const nuevaVentana = window.open(gmailLink.toString(), "_blank", "noopener,noreferrer");
+
+  if (nuevaVentana) {
+    nuevaVentana.opener = null;
+  }
+
+  setTimeout(() => {
+    window.location.href = mailtoLink;
+  }, 250);
+}
+
+const pedidoModal = document.getElementById("pedido-confirm-modal");
+const pedidoModalMessage = document.getElementById("pedido-confirm-message");
+const pedidoModalCloseButton = document.getElementById("pedido-confirm-close");
+
+function cerrarPedidoModal() {
+  if (!pedidoModal) {
+    return;
+  }
+
+  pedidoModal.hidden = true;
+  pedidoModal.setAttribute("aria-hidden", "true");
+  pedidoModal.classList.remove("is-open");
+}
+
+function mostrarConfirmacionPedido({ correo, nombreLibro, asunto, mensaje }) {
+  if (!pedidoModal || !pedidoModalMessage) {
+    return;
+  }
+
+  const resumen = [
+    "Su pedido a sido enviado correctamente, este sera analizado para posteriormente subirlo a la pagina, este proceso se realizara en fines de semana para evitar problemas en la pagina web",
+    "",
+    "Resumen de la petición",
+    "El cuestionario que se envio",
+    `Correo: ${correo}`,
+    `Libro: ${nombreLibro}`,
+    `Asunto: ${asunto}`,
+    `Detalles: ${mensaje || "Sin detalles adicionales."}`
+  ].join("\n");
+
+  pedidoModalMessage.textContent = resumen;
+  pedidoModal.hidden = false;
+  pedidoModal.setAttribute("aria-hidden", "false");
+  pedidoModal.classList.add("is-open");
+}
+
+if (botonCorreoAviso) {
+  botonCorreoAviso.addEventListener("click", () => {
+    abrirCorreo({
+      destinatario: DESTINO_CORREO,
+      asunto: "Petición de subida de contenido faltante",
+      cuerpo: [
+        "Por favor, adjunte el material o proporcione la referencia del libro solicitado.",
+        "",
+        "Nombre del libro:",
+        "",
+        "Detalles adicionales:"
+      ].join("\n")
+    });
+  });
+}
+
+if (pedidoModalCloseButton) {
+  pedidoModalCloseButton.addEventListener("click", cerrarPedidoModal);
+}
+
+if (pedidoModal) {
+  pedidoModal.addEventListener("click", (evento) => {
+    if (evento.target instanceof HTMLElement && evento.target.dataset.closeModal === "true") {
+      cerrarPedidoModal();
+    }
+  });
+}
+
+if (formularioPedido) {
+  formularioPedido.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+
+    const correo = formularioPedido.elements.email.value.trim();
+    const nombreLibro = formularioPedido.elements.book_title.value.trim();
+    const asunto = formularioPedido.elements.subject.value.trim();
+    const archivoInput = formularioPedido.elements.pdf;
+    const archivo = archivoInput ? archivoInput.files[0] : null;
+    const mensaje = formularioPedido.elements.message.value.trim();
+
+    if (!correo || !nombreLibro) {
+      if (estadoPedido) {
+        estadoPedido.textContent = "Completa el correo y el nombre del libro para continuar.";
+      }
+      return;
+    }
+
+    const asuntoFinal = asunto || "Petición de subida de contenido faltante";
+
+    try {
+      const formData = new FormData(formularioPedido);
+      formData.set("subject", asuntoFinal);
+      formData.set("email", correo);
+      formData.set("book_title", nombreLibro);
+      formData.set("message", mensaje || "Sin detalles adicionales.");
+
+      if (estadoPedido) {
+        estadoPedido.textContent = "Enviando la solicitud...";
+      }
+
+      const respuesta = await fetch(formularioPedido.action, {
+        method: "POST",
+        body: formData,
+        headers: {
+          Accept: "application/json"
+        }
+      });
+
+      if (respuesta.ok) {
+        if (estadoPedido) {
+          estadoPedido.textContent = "Formulario enviado.";
+        }
+
+        mostrarConfirmacionPedido({
+          correo,
+          nombreLibro,
+          asunto: asuntoFinal,
+          mensaje: mensaje || "Sin detalles adicionales."
+        });
+
+        formularioPedido.reset();
+        return;
+      }
+
+      throw new Error("No se pudo enviar el formulario.");
+    } catch (error) {
+      if (estadoPedido) {
+        estadoPedido.textContent = "No se pudo enviar automáticamente. Se abrirá tu correo para completar la solicitud.";
+      }
+
+      const cuerpo = [
+        "Correo del solicitante: " + correo,
+        "Nombre del libro: " + nombreLibro,
+        "Asunto: " + asuntoFinal,
+        archivo ? "PDF adjunto: " + archivo.name : "PDF: No se adjuntó",
+        "",
+        "Detalles adicionales:",
+        mensaje || "Sin detalles adicionales."
+      ].join("\n");
+
+      abrirCorreo({
+        destinatario: DESTINO_CORREO,
+        asunto: asuntoFinal,
+        cuerpo
+      });
+
+      formularioPedido.reset();
+    }
+  });
+}
+
+Array.from(document.querySelectorAll('[data-email-link], a[href^="mailto:"]')).forEach((enlace) => {
+  enlace.addEventListener("click", (evento) => {
+    evento.preventDefault();
+
+    const href = enlace.getAttribute("href");
+
+    try {
+      const mailtoUrl = new URL(href);
+      const gmailUrl = new URL("https://mail.google.com/mail/");
+      const destinatario = mailtoUrl.pathname || mailtoUrl.searchParams.get("to") || DESTINO_CORREO;
+      const asunto = mailtoUrl.searchParams.get("subject") || "";
+      const cuerpo = mailtoUrl.searchParams.get("body") || "";
+
+      gmailUrl.searchParams.set("view", "cm");
+      gmailUrl.searchParams.set("fs", "1");
+      gmailUrl.searchParams.set("to", destinatario);
+
+      if (asunto) {
+        gmailUrl.searchParams.set("su", asunto);
+      }
+
+      if (cuerpo) {
+        gmailUrl.searchParams.set("body", cuerpo);
+      }
+
+      const ventanaGmail = window.open(gmailUrl.toString(), "_blank", "noopener,noreferrer");
+
+      if (ventanaGmail) {
+        ventanaGmail.opener = null;
+      }
+
+      setTimeout(() => {
+        window.location.href = href;
+      }, 250);
+    } catch (error) {
+      window.location.href = href;
+    }
+  });
+});
+
   sincronizarCatalogoDesdeInicio();
