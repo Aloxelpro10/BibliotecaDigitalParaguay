@@ -13,6 +13,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const bookInfoModal = document.getElementById("bookInfoModal");
   const closeBookInfoBtn = document.getElementById("closeBookInfoBtn");
   const bookInfoContent = document.getElementById("bookInfoContent");
+  const navButtonsContainer = document.querySelector(".button-navegation");
+
+  const ajustarBotonesNavegacion = () => {
+    if (!navButtonsContainer) return;
+
+    const esMobile = window.innerWidth <= 680;
+    navButtonsContainer.classList.toggle("compact-mobile", esMobile);
+  };
+
+  window.addEventListener("resize", ajustarBotonesNavegacion);
+  ajustarBotonesNavegacion();
 
   const normalizarIdLibro = (valor) => {
     const texto = String(valor || "")
