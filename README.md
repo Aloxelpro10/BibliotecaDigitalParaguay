@@ -42,7 +42,9 @@ Digital_Library_Projects/
 │       ├── lector-pdf.js
 │       └── library.js
 └── templestes/
-    ├── Libro-Fundamentos-de-la-programacion.html
+    ├── Infirmatica/
+    │   ├──Libro-Fundamentos-de-la-programacion.html
+    │   └──
     └── Libro.html
 ```
 
@@ -56,8 +58,10 @@ Digital_Library_Projects/
 
 ### Carpeta `templestes/`
 
-- `Libro-Fundamentos-de-la-programacion.html`: detalle del libro real del proyecto.
 - `Libro.html`: plantilla base reutilizable para crear nuevas páginas de detalle.
+
+#### Informatica
+- `Libro-Fundamentos-de-la-programacion.html`: detalle del libro real del proyecto.
 
 ### Carpeta `static/`
 
@@ -164,25 +168,9 @@ El nombre tiene un acento combinado/variado en la palabra “programación”, y
 
 ## Cómo levantar el proyecto localmente
 
-Como es una web estática, existe más de una forma:
-
-### Opción 1: abrir directamente
+### Abrir directamente
 
 Abre `index.html` desde el navegador.
-
-### Opción 2: servirlo localmente
-
-Desde la raíz del proyecto:
-
-```bash
-python -m http.server 8000
-```
-
-Y luego accede a:
-
-```text
-http://localhost:8000
-```
 
 ## Qué está funcionando y qué debe corregirse
 
@@ -192,7 +180,7 @@ Actualmente hay un libro de ejemplo realmente integrado al sistema:
 
 - `Fundamentos de la Programación`
 - portada: `biblioteca_libros/portadas/Fundamentos de la programación 5.webp`
-- detalle: `templestes/Libro-Fundamentos-de-la-programacion.html`
+- detalle: `templestes/Informatica/Libro-Fundamentos-de-la-programacion.html`
 
 ### Problemas habituales que ya existen en el código
 
@@ -342,25 +330,9 @@ El nombre tiene un acento combinado/variado en la palabra “programación”, y
 
 ## Cómo levantar el proyecto localmente
 
-Como es una web estática, existe más de una forma:
-
-### Opción 1: abrir directamente
+### Abrir directamente
 
 Abre `index.html` desde el navegador.
-
-### Opción 2: servirlo localmente
-
-Desde la raíz del proyecto:
-
-```bash
-python -m http.server 8000
-```
-
-Y luego accede a:
-
-```text
-http://localhost:8000
-```
 
 ## Qué está funcionando y qué debe corregirse
 
@@ -370,7 +342,7 @@ Actualmente hay un libro de ejemplo realmente integrado al sistema:
 
 - `Fundamentos de la Programación`
 - portada: `biblioteca_libros/portadas/Fundamentos de la programación 5.webp`
-- detalle: `templestes/Libro-Fundamentos-de-la-programacion.html`
+- detalle: `templestes/Informatica/Libro-Fundamentos-de-la-programacion.html`
 
 ### Problemas habituales que ya existen en el código
 
