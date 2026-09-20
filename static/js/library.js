@@ -320,6 +320,85 @@ function mostrarConfirmacionPedido({ correo, nombreLibro, asunto, mensaje }) {
   pedidoModal.classList.add("is-open");
 }
 
+async function enviarFormularioPedido(formulario) {
+  const correo = formulario.elements.email.value.trim();
+  const nombreLibro = formulario.elements.book_title.value.trim();
+  const asunto = formulario.elements.subject.value.trim();
+  const archivoInput = formulario.elements.pdf;
+  const archivo = archivoInput ? archivoInput.files[0] : null;
+  const mensaje = formulario.elements.message.value.trim();
+
+  if (!correo || !nombreLibro) {
+    if (estadoPedido) {
+      estadoPedido.textContent = "Completa el correo y el nombre del libro para continuar.";
+    }
+    return { ok: false, motivo: "campos-invalidos" };
+  }
+
+  const asuntoFinal = asunto || "Petición de subida de contenido faltante";
+
+  if (estadoPedido) {
+    estadoPedido.textContent = "Enviando la solicitud...";
+  }
+
+  try {
+    const formData = new FormData(formulario);
+    formData.set("subject", asuntoFinal);
+    formData.set("email", correo);
+    formData.set("book_title", nombreLibro);
+    formData.set("message", mensaje || "Sin detalles adicionales.");
+
+    const respuesta = await fetch(formulario.action, {
+      method: "POST",
+      body: formData,
+      headers: {
+        Accept: "application/json"
+      }
+    });
+
+    const textoRespuesta = await respuesta.text();
+    let payload = null;
+
+    try {
+      payload = textoRespuesta ? JSON.parse(textoRespuesta) : null;
+    } catch (error) {
+      payload = null;
+    }
+
+    const envioCorrecto = respuesta.ok && (!payload || payload.ok !== false);
+
+    if (envioCorrecto) {
+      return {
+        ok: true,
+        correo,
+        nombreLibro,
+        asunto: asuntoFinal,
+        mensaje: mensaje || "Sin detalles adicionales."
+      };
+    }
+
+    return {
+      ok: false,
+      motivo: "respuesta-fallida",
+      correo,
+      nombreLibro,
+      asunto: asuntoFinal,
+      mensaje: mensaje || "Sin detalles adicionales.",
+      archivo
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      motivo: "error-red",
+      correo,
+      nombreLibro,
+      asunto: asuntoFinal,
+      mensaje: mensaje || "Sin detalles adicionales.",
+      archivo
+    };
+  }
+}
+
 if (botonCorreoAviso) {
   botonCorreoAviso.addEventListener("click", () => {
     abrirCorreo({
@@ -352,81 +431,45 @@ if (formularioPedido) {
   formularioPedido.addEventListener("submit", async (evento) => {
     evento.preventDefault();
 
-    const correo = formularioPedido.elements.email.value.trim();
-    const nombreLibro = formularioPedido.elements.book_title.value.trim();
-    const asunto = formularioPedido.elements.subject.value.trim();
-    const archivoInput = formularioPedido.elements.pdf;
-    const archivo = archivoInput ? archivoInput.files[0] : null;
-    const mensaje = formularioPedido.elements.message.value.trim();
+    const resultado = await enviarFormularioPedido(formularioPedido);
 
-    if (!correo || !nombreLibro) {
+    if (resultado.ok) {
       if (estadoPedido) {
-        estadoPedido.textContent = "Completa el correo y el nombre del libro para continuar.";
-      }
-      return;
-    }
-
-    const asuntoFinal = asunto || "Petición de subida de contenido faltante";
-
-    try {
-      const formData = new FormData(formularioPedido);
-      formData.set("subject", asuntoFinal);
-      formData.set("email", correo);
-      formData.set("book_title", nombreLibro);
-      formData.set("message", mensaje || "Sin detalles adicionales.");
-
-      if (estadoPedido) {
-        estadoPedido.textContent = "Enviando la solicitud...";
+        estadoPedido.textContent = "Formulario enviado.";
       }
 
-      const respuesta = await fetch(formularioPedido.action, {
-        method: "POST",
-        body: formData,
-        headers: {
-          Accept: "application/json"
-        }
-      });
-
-      if (respuesta.ok) {
-        if (estadoPedido) {
-          estadoPedido.textContent = "Formulario enviado.";
-        }
-
-        mostrarConfirmacionPedido({
-          correo,
-          nombreLibro,
-          asunto: asuntoFinal,
-          mensaje: mensaje || "Sin detalles adicionales."
-        });
-
-        formularioPedido.reset();
-        return;
-      }
-
-      throw new Error("No se pudo enviar el formulario.");
-    } catch (error) {
-      if (estadoPedido) {
-        estadoPedido.textContent = "No se pudo enviar automáticamente. Se abrirá tu correo para completar la solicitud.";
-      }
-
-      const cuerpo = [
-        "Correo del solicitante: " + correo,
-        "Nombre del libro: " + nombreLibro,
-        "Asunto: " + asuntoFinal,
-        archivo ? "PDF adjunto: " + archivo.name : "PDF: No se adjuntó",
-        "",
-        "Detalles adicionales:",
-        mensaje || "Sin detalles adicionales."
-      ].join("\n");
-
-      abrirCorreo({
-        destinatario: DESTINO_CORREO,
-        asunto: asuntoFinal,
-        cuerpo
+      mostrarConfirmacionPedido({
+        correo: resultado.correo,
+        nombreLibro: resultado.nombreLibro,
+        asunto: resultado.asunto,
+        mensaje: resultado.mensaje
       });
 
       formularioPedido.reset();
+      return;
     }
+
+    if (estadoPedido) {
+      estadoPedido.textContent = "No se pudo enviar automáticamente. Se abrirá tu correo para completar la solicitud.";
+    }
+
+    const cuerpo = [
+      "Correo del solicitante: " + resultado.correo,
+      "Nombre del libro: " + resultado.nombreLibro,
+      "Asunto: " + resultado.asunto,
+      resultado.archivo ? "PDF adjunto: " + resultado.archivo.name : "PDF: No se adjuntó",
+      "",
+      "Detalles adicionales:",
+      resultado.mensaje || "Sin detalles adicionales."
+    ].join("\n");
+
+    abrirCorreo({
+      destinatario: DESTINO_CORREO,
+      asunto: resultado.asunto,
+      cuerpo
+    });
+
+    formularioPedido.reset();
   });
 }
 
