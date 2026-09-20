@@ -168,7 +168,7 @@
             <li>Español</li>
           </ul>
           <div class="book-actions">
-            <a class="secondary-button" href="/libros/pdfs/literatura-paraguaya.pdf">Abrir PDF</a>
+            <a class="secondary-button" href="/libros/pdfs/literatura-paraguaya.pdf">Ver detalles</a>
             <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
             <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
           </div>
@@ -196,7 +196,7 @@
             <li>Español</li>
           </ul>
           <div class="book-actions">
-            <a class="secondary-button" href="/libros/pdfs/ciencias-basicas.pdf">Abrir PDF</a>
+            <a class="secondary-button" href="/libros/pdfs/ciencias-basicas.pdf">Ver detalles</a>
             <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
             <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
           </div>
@@ -224,15 +224,114 @@
             <li>Guarani</li>
           </ul>
           <div class="book-actions">
-            <a class="secondary-button" href="/libros/pdfs/matematica-prueba.pdf">Abrir PDF</a>
+            <a class="secondary-button" href="/libros/pdfs/matematica-prueba.pdf">Ver detalles</a>
             <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
             <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
           </div>
         </div>
       </article>
     </section>
+
+    <section class="communication-strip" aria-label="Comunicacion con la biblioteca">
+      <div>
+        <p class="eyebrow">Comunicación</p>
+        <h2>Tu opinión ayuda a mejorar la biblioteca</h2>
+      </div>
+      <div class="communication-actions">
+        <a class="secondary-button communication-button" href="mailto:juaneolearybibliotecadigital@gmail.com?body=Recomendación%20de%20cambios:%0D%0A%0D%0AQuiero%20sugerir%20lo%20siguiente:%0D%0A%0D%0A" target="_blank" rel="noopener noreferrer" data-email-link>Sugerencia</a>
+        <a class="primary-button communication-button" href="mailto:juaneolearybibliotecadigital@gmail.com?body=Reporte%20de%20errores:%0D%0A%0D%0ADetalles%20del%20problema:%0D%0A%0D%0A" target="_blank" rel="noopener noreferrer" data-email-link>Reporte de errores</a>
+      </div>
+    </section>
+
+    <section class="request-section" id="pedidos-de-subida" aria-labelledby="pedidos-titulo">
+      <div class="section-header">
+        <p class="eyebrow">Solicitudes</p>
+        <h2 id="pedidos-titulo">Pedidos de subida</h2>
+        <p>Solicita agregar contenido faltante a la biblioteca y envía la información directamente desde esta página.</p>
+      </div>
+
+      <form
+        id="pedido-subida-form"
+        class="upload-request-form"
+        method="POST"
+        action="https://formspree.io/f/xvkgkgny"
+        enctype="multipart/form-data"
+      >
+        <div class="form-grid">
+          <label>
+            <span>Correo del solicitante</span>
+            <input type="email" name="email" placeholder="correo@ejemplo.com" required>
+          </label>
+
+          <label>
+            <span>Nombre del libro</span>
+            <input type="text" name="book_title" placeholder="Ejemplo: Historia de Paraguay" required>
+          </label>
+
+          <label>
+            <span>Asunto</span>
+            <input type="text" name="subject" placeholder="Opcional: Petición de subida de contenido faltante">
+          </label>
+
+          <label class="full-width">
+            <span>Detalles adicionales (Año, Autor, Curso, etc.)</span>
+            <textarea name="message" rows="4" placeholder="Escribe información extra, curso, año, autor o una breve descripción del material que deseas solicitar."></textarea>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="primary-button">Enviar petición</button>
+        </div>
+      </form>
+
+      <div class="form-warning-row">
+        <p class="form-warning">Debido a limitaciones de la plataforma y el sistema automatizado de mensajería, le recomendamos utilizar directamente el correo electrónico adjunto para enviar sus archivos PDF. De lo contrario, solo envie la información esencial para encontrarlo y subirlo.</p>
+        <button type="button" class="primary-button form-warning-button" data-open-email-request>Enviar por correo</button>
+      </div>
+      <p id="pedido-status" class="form-status" aria-live="polite"></p>
+    </section>
   </main>
 
-  <script src="static/js/library.js"></script>
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>Biblioteca Digital Paraguay</h3>
+        <p>Una colección pensada para facilitar el acceso a materiales educativos y fomentar la lectura en cada hogar y aula.</p>
+      </div>
+
+      <div class="footer-column">
+        <h4>Navegación</h4>
+        <ul>
+          <li><a href="Inicio.html">Inicio</a></li>
+          <li><a href="favoritos.html">Favoritos</a></li>
+          <li><a href="#pedidos-de-subida">Pedidos de subida</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4>Contacto</h4>
+        <ul>
+          <li><a href="mailto:juaneolearybibliotecadigital@gmail.com" target="_blank" rel="noopener noreferrer" data-email-link>juaneolearybibliotecadigital@gmail.com</a></li>
+          <li><a href="mailto:juaneolearybibliotecadigital@gmail.com?body=Recomendación%20de%20cambios:%0D%0A%0D%0AQuiero%20sugerir%20lo%20siguiente:%0D%0A%0D%0A" target="_blank" rel="noopener noreferrer" data-email-link>Sugerencias</a></li>
+          <li><a href="mailto:juaneolearybibliotecadigital@gmail.com?body=Reporte%20de%20errores:%0D%0A%0D%0ADetalles%20del%20problema:%0D%0A%0D%0A" target="_blank" rel="noopener noreferrer" data-email-link>Reportes</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4>Soporte</h4>
+        <ul>
+          <li><a href="#pedidos-de-subida">Solicitar contenido</a></li>
+          <li><a href="mailto:juaneolearybibliotecadigital@gmail.com?body=Reporte%20de%20errores:%0D%0A%0D%0ADetalles%20del%20problema:%0D%0A%0D%0A" target="_blank" rel="noopener noreferrer" data-email-link>Ayuda técnica</a></li>
+          <li><a href="mailto:juaneolearybibliotecadigital@gmail.com?body=Recomendación%20de%20cambios:%0D%0A%0D%0AQuiero%20sugerir%20lo%20siguiente:%0D%0A%0D%0A" target="_blank" rel="noopener noreferrer" data-email-link>Recomendaciones</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 Biblioteca Digital Paraguay. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+<script src="static/js/library.js"></script>
 </body>
 </html>
