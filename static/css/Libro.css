@@ -339,6 +339,20 @@ body.library-page-bg {
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
+.button-navegation.compact-mobile {
+  gap: 8px;
+}
+
+.button-navegation.compact-mobile button,
+.button-navegation.compact-mobile a {
+  min-width: 0;
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0 10px;
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
+}
+
 .button-navegation button:hover,
 .button-navegation a:hover {
   transform: translateY(-2px);
