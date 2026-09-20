@@ -6,316 +6,39 @@
     <title>Fundamentos de la programación (5° Edición)</title>
     <link rel="stylesheet" href="../static/css/Libro.css">
     <link rel="stylesheet" href="../static/css/lector-pdf.css">
-</head>document.addEventListener("DOMContentLoaded", () => {
-  const pageUrl = window.location.href;
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(pageUrl)}`;
-  const qrImage = document.getElementById("qrImage");
-  const qrModal = document.getElementById("qrModal");
-  const qrModalImage = document.getElementById("qrModalImage");
-  const downloadBtn = document.getElementById("downloadQrBtn");
-  const downloadModalBtn = document.getElementById("downloadModalQrBtn");
-  const openQrBtn = document.getElementById("openQrBtn");
-  const closeQrBtn = document.getElementById("closeQrBtn");
-  const favoriteButton = document.querySelector(".favorite-button");
-  const openBookInfoBtn = document.getElementById("openBookInfoBtn");
-  const bookInfoModal = document.getElementById("bookInfoModal");
-  const closeBookInfoBtn = document.getElementById("closeBookInfoBtn");
-  const bookInfoContent = document.getElementById("bookInfoContent");
-
-  const normalizarIdLibro = (valor) => {
-    const texto = String(valor || "")
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    return texto || "libro";
-  };
-
-  const normalizarFavoritos = (libros) => {
-    const vistos = new Set();
-
-    return (Array.isArray(libros) ? libros : []).reduce((resultado, libro) => {
-      const id = normalizarIdLibro(libro?.id || libro?.titulo || "");
-
-      if (!vistos.has(id)) {
-        vistos.add(id);
-        resultado.push({ ...libro, id });
-      }
-
-      return resultado;
-    }, []);
-  };
-
-  const obtenerIdLibro = () => {
-    const idDesdeBody = document.body?.dataset?.bookId || "";
-    const textoTitulo = document.querySelector(".eyebrow")?.textContent?.trim() || document.title.trim();
-    return normalizarIdLibro(idDesdeBody || textoTitulo);
-  };
-
-  const buscarLibroEnInicio = (idLibro) => {
-    try {
-      const catalogo = JSON.parse(localStorage.getItem("bdp_book_catalog") || "{}");
-      const libroCatalogado = catalogo[idLibro];
-
-      if (libroCatalogado) {
-        return {
-          ...libroCatalogado,
-          id: normalizarIdLibro(libroCatalogado.id || idLibro),
-          descripcion: libroCatalogado.descripcion || "Libro guardado en favoritos."
-        };
-      }
-    } catch (error) {
-      // Ignora error y usa el fallback del detalle.
-    }
-
-    const tarjetasInicio = Array.from(document.querySelectorAll(".book-card"));
-    const tarjeta = tarjetasInicio.find((item) => normalizarIdLibro(item.dataset.bookId || item.dataset.titulo || "") === idLibro);
-
-    if (!tarjeta) return null;
-
-    const imageElement = tarjeta.querySelector("img");
-    const titulo = tarjeta.dataset.titulo || tarjeta.querySelector("h2")?.textContent?.trim() || "Sin título";
-
-    return {
-      id: normalizarIdLibro(idLibro || tarjeta.dataset.bookId || titulo),
-      titulo,
-      categoria: tarjeta.querySelector(".book-category")?.textContent?.trim() || "",
-      materia: tarjeta.dataset.materia || "",
-      grado: tarjeta.dataset.grado || "",
-      anio: tarjeta.dataset.anio || "",
-      idioma: tarjeta.dataset.idioma || "",
-      descripcion: tarjeta.querySelector("p")?.textContent?.trim() || "",
-      imagen: imageElement ? imageElement.src : "",
-      href: tarjeta.querySelector("a")?.href || pageUrl,
-      origen: "recomendados"
-    };
-  };
-
-  const obtenerFavoritos = () => {
-    try {
-      return normalizarFavoritos(JSON.parse(localStorage.getItem("bdp_favorite_books") || "[]"));
-    } catch (error) {
-      return [];
-    }
-  };
-
-  const guardarFavoritos = (libros) => {
-    localStorage.setItem("bdp_favorite_books", JSON.stringify(normalizarFavoritos(libros)));
-  };
-
-  const actualizarEstadoFavorito = () => {
-    if (!favoriteButton) return;
-
-    const favoritos = obtenerFavoritos();
-    const bookId = obtenerIdLibro();
-    const estaFavorito = favoritos.some((libro) => normalizarIdLibro(libro.id) === bookId);
-
-    favoriteButton.classList.toggle("is-favorite", estaFavorito);
-    favoriteButton.textContent = estaFavorito ? "Favorito ✓" : "Agregar a favoritos";
-    favoriteButton.setAttribute("aria-pressed", String(estaFavorito));
-  };
-
-  if (favoriteButton) {
-    favoriteButton.addEventListener("click", () => {
-      const idLibro = obtenerIdLibro();
-      const libroDesdeInicio = buscarLibroEnInicio(idLibro);
-      const titulo = document.querySelector(".eyebrow")?.textContent?.trim() || document.title.trim();
-      const image = document.querySelector(".book-cover img")?.src || "";
-
-      const libro = libroDesdeInicio || {
-        id: idLibro,
-        titulo,
-        descripcion: "Libro guardado en favoritos.",
-        imagen: image,
-        href: pageUrl
-      };
-
-      if (window.bdpToggleFavorito) {
-        window.bdpToggleFavorito(idLibro, libro);
-      } else {
-        const favoritos = obtenerFavoritos();
-        const indice = favoritos.findIndex((item) => normalizarIdLibro(item.id) === idLibro);
-
-        if (indice >= 0) {
-          favoritos.splice(indice, 1);
-        } else {
-          favoritos.unshift(libro);
-        }
-
-        guardarFavoritos(favoritos);
-      }
-
-      actualizarEstadoFavorito();
-    });
-
-    actualizarEstadoFavorito();
-  }
-
-  const construirInfoLibro = () => {
-    const datosPorDefecto = {
-      nombre: document.title || "Nombre del libro",
-      editorial: "Editorial",
-      autor: "Autor",
-      fecha: "Fecha de publicación",
-      idioma: "Idioma",
-      paginas: "Páginas",
-      capitulos: []
-    };
-
-    try {
-      const raw = document.body?.dataset?.bookInfo || "{}";
-      const datos = JSON.parse(raw);
-      const scriptCapitulos = document.getElementById("book-capitulos-data");
-      const capitulos = scriptCapitulos ? JSON.parse(scriptCapitulos.textContent) : (datos.capitulos || []);
-
-      return {
-        ...datosPorDefecto,
-        ...datos,
-        capitulos: Array.isArray(capitulos) ? capitulos : []
-      };
-    } catch (error) {
-      return datosPorDefecto;
-    }
-  };
-
-  const renderCapitulos = (capitulos) => {
-    if (!Array.isArray(capitulos) || capitulos.length === 0) {
-      return '<div class="book-info-row"><span>Capítulos que abarcará</span><strong>-</strong></div>';
-    }
-
-    return capitulos.map((capitulo) => {
-      if (typeof capitulo === "string") {
-        return `
-          <div class="book-info-row">
-            <span>Capítulos que abarcará</span>
-            <strong>${String(capitulo).replace(/\n/g, "<br>")}</strong>
-          </div>
-        `;
-      }
-
-      if (capitulo?.tipo === "parte" || capitulo?.titulo) {
-        const items = Array.isArray(capitulo.items) ? capitulo.items : [];
-        const itemsHtml = items.length
-          ? `<ul class="book-info-section-list">${items.map((item) => `<li>${String(item)}</li>`).join("")}</ul>`
-          : "";
-
-        return `
-          <div class="book-info-section">
-            <h4 class="book-info-section-title">${String(capitulo.titulo || "Sección")}</h4>
-            ${itemsHtml}
-          </div>
-        `;
-      }
-
-      return `
-        <div class="book-info-row">
-          <span>Capítulos que abarcará</span>
-          <strong>${String(capitulo?.texto || capitulo?.titulo || "-").replace(/\n/g, "<br>")}</strong>
-        </div>
-      `;
-    }).join("");
-  };
-
-  const cargarInformacionLibro = () => {
-    if (!bookInfoContent) return;
-
-    const datos = construirInfoLibro();
-    const campos = [
-      { label: "Nombre del libro", value: datos.nombre },
-      { label: "Editorial", value: datos.editorial },
-      { label: "Autor", value: datos.autor },
-      { label: "Fecha de publicación", value: datos.fecha },
-      { label: "Idioma", value: datos.idioma },
-      { label: "Páginas", value: datos.paginas }
-    ];
-
-    const contenidoBase = campos
-      .map((campo) => `
-        <div class="book-info-row">
-          <span>${campo.label}</span>
-          <strong>${String(campo.value || "-").replace(/\n/g, "<br>")}</strong>
-        </div>
-      `)
-      .join("");
-
-    bookInfoContent.innerHTML = `${contenidoBase}${renderCapitulos(datos.capitulos)}`;
-  };
-
-  if (openBookInfoBtn && bookInfoModal) {
-    openBookInfoBtn.addEventListener("click", () => {
-      cargarInformacionLibro();
-      bookInfoModal.showModal();
-    });
-  }
-
-  if (closeBookInfoBtn && bookInfoModal) {
-    closeBookInfoBtn.addEventListener("click", () => bookInfoModal.close());
-  }
-
-  if (bookInfoModal) {
-    bookInfoModal.addEventListener("click", (event) => {
-      if (event.target === bookInfoModal) bookInfoModal.close();
-    });
-  }
-
-  if (!qrImage) return;
-
-  const qrImages = [qrImage, qrModalImage].filter(Boolean);
-  let qrIsReady = false;
-
-  const markQrAsReady = () => {
-    qrIsReady = true;
-    if (downloadBtn) downloadBtn.disabled = false;
-    if (downloadModalBtn) downloadModalBtn.disabled = false;
-  };
-
-  const downloadQr = async () => {
-    if (!qrIsReady) return;
-
-    try {
-      const response = await fetch(qrSrc, { mode: "cors", cache: "no-store" });
-      if (!response.ok) throw new Error(`No se pudo obtener el QR (${response.status})`);
-
-      const qrBlob = await response.blob();
-      const downloadUrl = URL.createObjectURL(qrBlob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = "qr-libro.png";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(downloadUrl);
-    } catch (error) {
-      console.error("Error al descargar el QR:", error);
-      window.open(qrSrc, "_blank", "noopener,noreferrer");
-    }
-  };
-
-  qrImages.forEach((image) => {
-    image.src = qrSrc;
-    image.addEventListener("load", markQrAsReady, { once: true });
-  });
-
-  if (downloadBtn) downloadBtn.addEventListener("click", downloadQr);
-  if (downloadModalBtn) downloadModalBtn.addEventListener("click", downloadQr);
-
-  if (openQrBtn && qrModal) {
-    openQrBtn.addEventListener("click", () => qrModal.showModal());
-  }
-
-  if (closeQrBtn && qrModal) {
-    closeQrBtn.addEventListener("click", () => qrModal.close());
-  }
-
-  if (qrModal) {
-    qrModal.addEventListener("click", (event) => {
-      if (event.target === qrModal) qrModal.close();
-    });
-  }
-});
-<body class="library-page-bg" data-book-id="Fundamentos-de-la-programacion">
+</head>
+<body class="library-page-bg" data-book-id="Fundamentos-de-la-programacion" 
+    data-book-info='{"nombre":"Fundamentos de la programación (5° Edición)",
+    "editorial":"McGraw-Hill / Ingebook",
+    "autor":"Luis Joyanes Aguilar",
+    "fecha":"2023",
+    "idioma":"Español",
+    "paginas":"745 páginas"}'>
+    <script id="book-capitulos-data" type="application/json" aria-hidden="true">
+        [{"tipo":"texto","texto":"Prólogo a la quinta edición"},
+        {"tipo":"parte","titulo":"PARTE I. ALGORITMOS Y HERRAMIENTAS DE PROGRAMACIÓN",
+            "items":["Capítulo 1. Introducción a las computadoras y a los lenguajes de programación",
+            "Capítulo 2. Metodología de la programación y desarrollo de software",
+            "Capítulo 3. Estructura general de un programa",
+            "Capítulo 4. Flujo de control I: estructuras selectivas",
+            "Capítulo 5. Flujo de control II: estructuras repetitivas",
+            "Capítulo 6. Subprogramas (subalgoritmos): funciones"]},
+        {"tipo":"parte","titulo":"PARTE II. ESTRUCTURA DE DATOS",
+            "items":["Capítulo 7. Estructuras de datos I (arrays ?arreglos? y estructuras)",
+            "Capítulo 8. Las cadenas de caracteres","Capítulo 9. Archivos (ficheros)",
+            "Capítulo 10. Ordenación, búsqueda e intercalación",
+            "Capítulo 11. Ordenación, búsqueda y fusión externa (archivos)",
+            "Capítulo 12. Estructuras dinámicas lineales de datos (pilas, colas y listas enlazadas)",
+            "Capítulo 13. Estructura de datos no lineales (árboles y grafos)",
+            "Capítulo 14. Recursividad"]},
+        {"tipo":"parte","titulo":"PARTE III. PROGRAMACIÓN ORIENTADA A OBJETOS Y UML 2.5.1",
+            "items":["Capítulo 15. Tipos abstractos de datos, objetos y modelado con UML 2.5.1",
+            "Capítulo 16. Diseño de clases y objetos: representaciones gráficas en UML",
+            "Capítulo 17. Relaciones entre clases: delegaciones, asociaciones, agregaciones, herencia"]},
+        {"tipo":"parte","titulo":"PARTE IV. METODOLOGÍA DE LA PROGRAMACIÓN Y DESARROLLO DE SOFTWARE",
+            "items":["Capítulo 18. Ingeniería de software y metodología de la programación"]},
+        {"tipo":"texto","texto":"Bibliografía y recursos de programación"}]
+    </script>
     <section class="toolbar" aria-label="Navegación de regreso">
         <a href="../Inicio.html" class="back-button" aria-label="Volver a recomendados">
             <img src="../static/img/Back-button.png" alt="Botón volver a recomendados">
@@ -358,12 +81,13 @@
                 </div>
                 <p> </p>  
                 <p class="qr-subtitle">Fuente del libro</p>
-                <button class="qr-url" type="button" onclick="window.open('https://www.bibliotecaParaguay.com/hsbsdjbckbdhbgcuybbsdchjbgcsjnch', '_blank', 'noopener,noreferrer')">https://www.bibliotecaParaguay.com/hsbsdjbckbdhbgcuybbsdchjbgcsjnch</button>
+                <button class="qr-url" type="button" onclick="window.open('https://www.ingebook.com/ib/NPcd/IB_BooksVis?cod_primaria=1000187&codigo_libro=10211', '_blank', 'noopener,noreferrer')">https://www.ingebook.com</button>
             </div>
         </aside>
     </main>
     <div class="button-navegation">
         <button class="favorite-button" type="button" aria-pressed="false">Agregar a favoritos</button>
+        <button id="openBookInfoBtn" class="info-book-button" type="button">Más información</button>
         <button class="open-book-button" type="button" data-pdf="informatica/Fundamentos%20de%20programacio%CC%81n%205.pdf">Leer</button>
         <a href="https://biblioteca-r2.williandesiderio3.workers.dev/informatica/Fundamentos%20de%20programacio%CC%81n%205.pdf?download=1">Descargar</a>
     </div>
@@ -376,6 +100,17 @@
         <div class="qr-modal-actions">
             <button id="downloadModalQrBtn" class="qr-btn" type="button" disabled>Descargar QR</button>
             <button id="closeQrBtn" class="qr-close-btn" type="button">Cerrar</button>
+        </div>
+    </dialog>
+
+    <dialog class="book-info-modal" id="bookInfoModal" aria-labelledby="bookInfoTitle">
+        <div class="book-info-header">
+            <h3 id="bookInfoTitle">Información del libro</h3>
+            <button id="closeBookInfoBtn" class="modal-close-btn" type="button" aria-label="Cerrar información del libro">Cerrar</button>
+        </div>
+
+        <div class="book-info-scroll">
+            <div id="bookInfoContent" class="book-info-content" aria-live="polite"></div>
         </div>
     </dialog>
 
