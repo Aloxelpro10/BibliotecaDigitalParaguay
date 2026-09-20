@@ -519,6 +519,234 @@ a {
   text-align: center;
 }
 
+.communication-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto 30px;
+  padding: 28px 30px;
+  border: 1px solid rgba(18, 61, 99, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 28px rgba(23, 33, 43, 0.08);
+}
+
+.communication-strip h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+}
+
+.communication-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.communication-button {
+  min-width: 180px;
+}
+
+.request-section {
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 34px 28px 12px;
+  border: 1px solid rgba(18, 61, 99, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 12px 28px rgba(23, 33, 43, 0.05);
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  margin: 0 0 10px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.section-header p:last-child {
+  max-width: 760px;
+  margin: 0;
+  color: #3a4d5d;
+  line-height: 1.6;
+}
+
+.upload-request-form {
+  display: grid;
+  gap: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.upload-request-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.upload-request-form input,
+.upload-request-form textarea {
+  width: 100%;
+  border: 1px solid rgba(18, 61, 99, 0.18);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: #ffffff;
+  color: var(--ink);
+  font: inherit;
+}
+
+.upload-request-form textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.upload-request-form input:focus,
+.upload-request-form textarea:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(15, 124, 107, 0.14);
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 10px;
+}
+
+.form-warning-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.form-warning {
+  flex: 1;
+  margin: 0;
+  color: #3a4d5d;
+  line-height: 1.6;
+}
+
+.form-warning-button {
+  white-space: nowrap;
+}
+
+.form-status {
+  min-height: 20px;
+  margin: 0;
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.site-footer {
+  margin-top: 38px;
+  padding: 34px 0 26px;
+  background: rgba(18, 33, 45, 0.96);
+  color: #dfeaf6;
+}
+
+.footer-grid {
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 22px;
+}
+
+.footer-brand h3,
+.footer-column h4 {
+  margin: 0 0 14px;
+  color: #ffffff;
+}
+
+.footer-brand p,
+.footer-column li,
+.footer-column a,
+.footer-bottom p {
+  color: rgba(223, 234, 246, 0.8);
+  line-height: 1.7;
+}
+
+.footer-column ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-column li + li {
+  margin-top: 8px;
+}
+
+.footer-bottom {
+  width: min(1180px, calc(100% - 36px));
+  margin: 18px auto 0;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .communication-strip,
+  .footer-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .communication-strip {
+    display: grid;
+    gap: 18px;
+  }
+
+  .footer-grid {
+    display: grid;
+  }
+}
+
+@media (max-width: 620px) {
+  .library-layout,
+  .favorites-layout {
+    width: min(100% - 22px, 1180px);
+  }
+
+  .filter-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .book-grid,
+  .favorites-list {
+    grid-template-columns: 1fr;
+  }
+
+  .communication-button {
+    width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
 .favorites-empty h2 {
   margin-top: 0;
   font-size: 1.5rem;
@@ -569,6 +797,7 @@ a {
   margin: 0;
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.6;
+  white-space: pre-line;
 }
 
 .favorites-confirm-actions {
