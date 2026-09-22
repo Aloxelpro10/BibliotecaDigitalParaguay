@@ -405,6 +405,7 @@ function cerrarPedidoModal() {
   }
 
   pedidoModal.hidden = true;
+  pedidoModal.style.display = "none";
   pedidoModal.setAttribute("aria-hidden", "true");
   pedidoModal.classList.remove("is-open");
 }
@@ -427,8 +428,15 @@ function mostrarConfirmacionPedido({ correo, nombreLibro, asunto, mensaje }) {
 
   pedidoModalMessage.textContent = resumen;
   pedidoModal.hidden = false;
+  pedidoModal.style.display = "grid";
   pedidoModal.setAttribute("aria-hidden", "false");
   pedidoModal.classList.add("is-open");
+
+  requestAnimationFrame(() => {
+    pedidoModal.hidden = false;
+    pedidoModal.style.display = "grid";
+    pedidoModal.classList.add("is-open");
+  });
 }
 
 async function enviarFormularioPedido(formulario) {
