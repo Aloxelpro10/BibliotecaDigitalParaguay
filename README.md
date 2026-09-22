@@ -4,12 +4,14 @@ Proyecto web estático para gestionar una pequeña biblioteca estudiantil con ca
 
 ## Estado actual del proyecto
 
-El repositorio está funcionando como una biblioteca web estática orientada a HTML, CSS y JavaScript.
+El repositorio está funcionando como una biblioteca web estática orientada a HTML, CSS y JavaScript, con funciones pedagógicas añadidas para seguimiento de lectura.
 
-- No hay servidor de aplicación ni API.
+- No hay servidor de aplicación ni API principal.
 - La persistencia de datos se hace en el navegador usando `localStorage`.
 - La navegación principal es por páginas estáticas y archivos del proyecto.
 - Hay un caso real de libro cargado, mientras que otros libros del catálogo son ejemplos o placeholders.
+- El sistema ya registra libros leídos y muestra estadísticas compactas por materia para apoyar el seguimiento académico.
+- La confirmación de pedidos de subida se muestra mediante un modal más robusto, evitando que desaparezca inconsistentemente en algunas ejecuciones.
 
 > Para probarlo no hace falta Flask ni dependencias de Python. Basta con abrir `index.html` o servir la carpeta local con un servidor simple.
 
@@ -42,9 +44,7 @@ Digital_Library_Projects/
 │       ├── lector-pdf.js
 │       └── library.js
 └── templestes/
-    ├── Infirmatica/
-    │   ├──Libro-Fundamentos-de-la-programacion.html
-    │   └──
+    ├── Libro-Fundamentos-de-la-programacion.html
     └── Libro.html
 ```
 
@@ -53,15 +53,23 @@ Digital_Library_Projects/
 ### Páginas principales
 
 - `index.html`: landing page de entrada a la biblioteca.
-- `Inicio.html`: catálogo principal con búsqueda y filtros.
+- `Inicio.html`: catálogo principal con búsqueda, filtros y seguimiento de lectura.
 - `favoritos.html`: lista de libros marcados como favoritos y eliminación en lote.
+
+### Seguimiento académico
+
+La vista de inicio incluye un resumen compacto que cuenta la cantidad de libros leídos. Además, desde un botón de estadísticas se abre una ventana emergente con la distribución porcentual y numérica por materia, usando el formato:
+
+```text
+67% Total: 2
+```
+
+Esto permite visualizar la proporción real de lectura dentro del conjunto de libros marcados como leídos, sin depender del total del catálogo completo, que puede ser prácticamente infinito.
 
 ### Carpeta `templestes/`
 
-- `Libro.html`: plantilla base reutilizable para crear nuevas páginas de detalle.
-
-#### Informatica
 - `Libro-Fundamentos-de-la-programacion.html`: detalle del libro real del proyecto.
+- `Libro.html`: plantilla base reutilizable para crear nuevas páginas de detalle.
 
 ### Carpeta `static/`
 
@@ -168,9 +176,25 @@ El nombre tiene un acento combinado/variado en la palabra “programación”, y
 
 ## Cómo levantar el proyecto localmente
 
-### Abrir directamente
+Como es una web estática, existe más de una forma:
+
+### Opción 1: abrir directamente
 
 Abre `index.html` desde el navegador.
+
+### Opción 2: servirlo localmente
+
+Desde la raíz del proyecto:
+
+```bash
+python -m http.server 8000
+```
+
+Y luego accede a:
+
+```text
+http://localhost:8000
+```
 
 ## Qué está funcionando y qué debe corregirse
 
@@ -180,7 +204,7 @@ Actualmente hay un libro de ejemplo realmente integrado al sistema:
 
 - `Fundamentos de la Programación`
 - portada: `biblioteca_libros/portadas/Fundamentos de la programación 5.webp`
-- detalle: `templestes/Informatica/Libro-Fundamentos-de-la-programacion.html`
+- detalle: `templestes/Libro-Fundamentos-de-la-programacion.html`
 
 ### Problemas habituales que ya existen en el código
 
@@ -192,6 +216,7 @@ Los siguientes puntos están documentados porque son los que más suelen romper 
 - Los nombres de archivo con caracteres especiales pueden generar errores reales en enlaces y en la lectura del PDF.
 - Los `data-book-id` deben mantenerse consistentes entre la tarjeta del catálogo y la página de detalle.
 - La información secundaria del libro debe mantenerse en un bloque estructurado y reutilizable para no complejizar el mantenimiento por parte de personas no técnicas.
+- El sistema de lectura debe seguir contemplando que el total útil de referencia es el conjunto de libros marcados como leídos, no el catálogo completo.
 
 ## Guía para agregar un nuevo libro
 
@@ -330,9 +355,25 @@ El nombre tiene un acento combinado/variado en la palabra “programación”, y
 
 ## Cómo levantar el proyecto localmente
 
-### Abrir directamente
+Como es una web estática, existe más de una forma:
+
+### Opción 1: abrir directamente
 
 Abre `index.html` desde el navegador.
+
+### Opción 2: servirlo localmente
+
+Desde la raíz del proyecto:
+
+```bash
+python -m http.server 8000
+```
+
+Y luego accede a:
+
+```text
+http://localhost:8000
+```
 
 ## Qué está funcionando y qué debe corregirse
 
@@ -342,7 +383,7 @@ Actualmente hay un libro de ejemplo realmente integrado al sistema:
 
 - `Fundamentos de la Programación`
 - portada: `biblioteca_libros/portadas/Fundamentos de la programación 5.webp`
-- detalle: `templestes/Informatica/Libro-Fundamentos-de-la-programacion.html`
+- detalle: `templestes/Libro-Fundamentos-de-la-programacion.html`
 
 ### Problemas habituales que ya existen en el código
 
@@ -400,5 +441,7 @@ Los siguientes puntos están documentados porque son los que más suelen romper 
 ## Resumen
 
 La biblioteca actual es una app front-end sin backend, con almacenamiento local y un catálogo de ejemplo muy simple. La documentación debe mantenerse alineada con eso: un sitio estático, con una colección real pequeña, una estructura modular y varios placeholders que sirven como referencia para ampliar la biblioteca.
+
+La innovación reciente añade una capa pedagógica útil: el sistema permite contar libros leídos, calcular la distribución por materia y mostrarla en una vista emergente con porcentaje y total, apoyando la idea de seguimiento del progreso académico sin necesidad de un backend completo. También se reforzó la confirmación de acciones relevantes como la solicitud de subida de contenido, asegurando una mejor experiencia visual y consistente en navegadores y en GitHub Pages.
 
 Si se desea escalar el proyecto, el siguiente paso lógico sería reemplazar `localStorage` por una API o base de datos real, manteniendo la misma arquitectura visual y de catálogo.
