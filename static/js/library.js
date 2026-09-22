@@ -33,6 +33,11 @@ const librosGuardados = JSON.parse(localStorage.getItem(CLAVE_SEGUIMIENTO) || "[
 const librosLeidos = new Set(librosGuardados);
 const tarjetas = Array.from(document.querySelectorAll("[data-book-id]"));
 const contadorResumen = document.querySelector("[data-summary-count]");
+const botonEstadisticas = document.querySelector("[data-open-reading-stats]");
+const modalEstadisticas = document.getElementById("reading-stat-modal");
+const modalEstadisticasTotal = document.querySelector("[data-modal-total]");
+const modalEstadisticasLista = document.querySelector("[data-modal-stats]");
+const modalEstadisticasCerrar = document.getElementById("reading-stat-close");
 const buscador = document.querySelector("[data-buscador]");
 const filtros = Array.from(document.querySelectorAll("[data-filtro]"));
 const botonFiltrar = document.querySelector("[data-aplicar-filtros]");
@@ -145,10 +150,100 @@ function actualizarTarjeta(tarjeta) {
   boton.setAttribute("aria-pressed", String(estaLeido));
 }
 
-function actualizarResumen() {
-  if (contadorResumen) {
-    contadorResumen.textContent = String(librosLeidos.size);
+function obtenerEtiquetaMateria(materia) {
+  const valor = String(materia || "general").trim();
+
+  if (!valor) {
+    return "General";
   }
+
+  return valor
+    .split("-")
+    .filter(Boolean)
+    .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1))
+    .join(" ");
+}
+
+function obtenerDistribucionLectura() {
+  const materias = new Map();
+  const librosTotalesLeidos = Array.from(librosLeidos).filter((idLibro) =>
+    tarjetas.some((tarjeta) => String(tarjeta.dataset.bookId) === String(idLibro))
+  );
+
+  librosTotalesLeidos.forEach((idLibro) => {
+    const tarjeta = tarjetas.find((item) => String(item.dataset.bookId) === String(idLibro));
+    const materia = String(tarjeta?.dataset?.materia || "general").trim() || "general";
+    const etiqueta = obtenerEtiquetaMateria(materia);
+
+    if (!materias.has(materia)) {
+      materias.set(materia, { etiqueta, total: 0 });
+    }
+
+    materias.get(materia).total += 1;
+  });
+
+  const filas = Array.from(materias.values()).sort((a, b) => b.total - a.total);
+
+  return {
+    total: librosTotalesLeidos.length,
+    filas
+  };
+}
+
+function actualizarProgresoAcademico() {
+  const { total, filas } = obtenerDistribucionLectura();
+
+  if (contadorResumen) {
+    contadorResumen.textContent = String(total);
+  }
+
+  if (modalEstadisticasTotal) {
+    modalEstadisticasTotal.textContent = String(total);
+  }
+
+  if (modalEstadisticasLista) {
+    modalEstadisticasLista.innerHTML = filas.length
+      ? filas.map((fila) => {
+          const porcentaje = total === 0 ? 0 : Math.round((fila.total / total) * 100);
+          return `
+            <div class="stat-row">
+              <div class="stat-row-top">
+                <span>${fila.etiqueta}</span>
+                <strong>${porcentaje}% Total: ${fila.total}</strong>
+              </div>
+              <div class="progress-meter mini-meter" aria-hidden="true">
+                <span class="progress-bar" style="width: ${porcentaje}%;"></span>
+              </div>
+            </div>
+          `;
+        }).join("")
+      : '<div class="stat-row-empty">Aún no has marcado libros como leídos.</div>';
+  }
+}
+
+function abrirEstadisticasLectura() {
+  if (!modalEstadisticas) {
+    return;
+  }
+
+  actualizarProgresoAcademico();
+  modalEstadisticas.hidden = false;
+  modalEstadisticas.setAttribute("aria-hidden", "false");
+  modalEstadisticas.classList.add("is-open");
+}
+
+function cerrarEstadisticasLectura() {
+  if (!modalEstadisticas) {
+    return;
+  }
+
+  modalEstadisticas.hidden = true;
+  modalEstadisticas.setAttribute("aria-hidden", "true");
+  modalEstadisticas.classList.remove("is-open");
+}
+
+function actualizarResumen() {
+  actualizarProgresoAcademico();
 }
 
 function obtenerValorFiltro(nombreFiltro) {
@@ -237,6 +332,22 @@ tarjetas.forEach((tarjeta) => {
 
 if (botonFiltrar) {
   botonFiltrar.addEventListener("click", aplicarFiltros);
+}
+
+if (botonEstadisticas) {
+  botonEstadisticas.addEventListener("click", abrirEstadisticasLectura);
+}
+
+if (modalEstadisticasCerrar) {
+  modalEstadisticasCerrar.addEventListener("click", cerrarEstadisticasLectura);
+}
+
+if (modalEstadisticas) {
+  modalEstadisticas.addEventListener("click", (evento) => {
+    if (evento.target && evento.target.matches(".favorites-confirm-backdrop")) {
+      cerrarEstadisticasLectura();
+    }
+  });
 }
 
 const formularioPedido = document.querySelector("#pedido-subida-form");
