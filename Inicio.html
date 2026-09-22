@@ -25,9 +25,15 @@
           En esta pagina encontraran varios libros de distintas materias y grados, con el fin de facilitar el acceso a la información y fomentar la lectura.
         </p>
       </div>
-      <div class="reading-summary" id="seguimiento">
-        <span class="summary-number" data-summary-count>0</span>
-        <span>libros marcados como leidos</span>
+      <div class="reading-summary progress-summary" id="seguimiento">
+        <div class="summary-inline">
+          <span class="summary-number" data-summary-count>0</span>
+          <span class="summary-label">libros leídos</span>
+        </div>
+
+        <div class="summary-actions">
+          <button type="button" class="secondary-button stats-button" data-open-reading-stats>Ver estadísticas de lectura</button>
+        </div>
       </div>
     </section>
 
@@ -202,34 +208,6 @@
           </div>
         </div>
       </article>
-
-      <article
-        class="book-card featured-book"
-        data-book-id="matematica-prueba"
-        data-titulo="Matematica de Prueba"
-        data-materia="matematica"
-        data-grado="8"
-        data-anio="2026"
-        data-idioma="guarani"
-      >
-        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Matematica de Prueba">
-        <div class="book-info">
-          <p class="book-category">Libro de prueba</p>
-          <h2>Matematica de Prueba</h2>
-          <p>Ejemplo para probar el buscador y los filtros. Puedes copiar esta tarjeta para crear mas libros.</p>
-          <ul class="tag-list" aria-label="Etiquetas del libro">
-            <li>Matematica</li>
-            <li>8 grado</li>
-            <li>2026</li>
-            <li>Guarani</li>
-          </ul>
-          <div class="book-actions">
-            <a class="secondary-button" href="/libros/pdfs/matematica-prueba.pdf">Ver detalles</a>
-            <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
-            <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
-          </div>
-        </div>
-      </article>
     </section>
 
     <section class="communication-strip" aria-label="Comunicacion con la biblioteca">
@@ -299,6 +277,21 @@
       <p id="pedido-confirm-message">Su pedido fue enviado.</p>
       <div class="favorites-confirm-actions">
         <button type="button" class="secondary-button" id="pedido-confirm-close">Aceptar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="reading-stat-modal" class="favorites-confirm-modal reading-stats-modal" hidden>
+    <div class="favorites-confirm-backdrop" data-close-modal="true"></div>
+    <div class="favorites-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="reading-stat-title">
+      <h2 id="reading-stat-title">Estadísticas de lectura</h2>
+      <div class="stats-summary">
+        <span class="summary-progress" data-modal-total>0</span>
+        <span>libros leídos</span>
+      </div>
+      <div class="stats-list" data-modal-stats aria-live="polite"></div>
+      <div class="favorites-confirm-actions">
+        <button type="button" class="secondary-button" id="reading-stat-close">Cerrar</button>
       </div>
     </div>
   </div>
