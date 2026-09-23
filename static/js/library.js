@@ -96,6 +96,8 @@ function alternarFavoritoPorId(bookId, datosLibro) {
       ...datosBase,
       id: idObjetivo,
       titulo: datosBase?.titulo || datosLibro?.titulo || "Sin título",
+      autor: datosBase?.autor || datosLibro?.autor || "Autor no registrado",
+      etiquetas: datosBase?.etiquetas || datosLibro?.etiquetas || [],
       descripcion: datosBase?.descripcion || datosLibro?.descripcion || "Libro guardado en favoritos."
     });
   }
@@ -106,20 +108,37 @@ function alternarFavoritoPorId(bookId, datosLibro) {
 
 window.bdpToggleFavorito = alternarFavoritoPorId;
 
+function obtenerEtiquetasLibro(tarjeta) {
+  const etiquetas = Array.from(tarjeta.querySelectorAll(".tag-list li"))
+    .map((item) => item.textContent?.trim())
+    .filter(Boolean);
+
+  const autor = (tarjeta.dataset.autor || "").trim();
+
+  if (autor && !etiquetas.some((etiqueta) => etiqueta.toLowerCase() === `${autor}`.toLowerCase())) {
+    etiquetas.unshift(`${autor}`);
+  }
+
+  return etiquetas.length ? etiquetas : [tarjeta.querySelector(".book-category")?.textContent?.trim() || "Libro"];
+}
+
 function construirDatosLibro(tarjeta) {
   const imageElement = tarjeta.querySelector("img");
   const titulo = tarjeta.dataset.titulo || tarjeta.querySelector("h2")?.textContent?.trim() || "Sin título";
   const descripcion = tarjeta.querySelector(".book-info p:not(.book-category)")?.textContent?.trim() || "";
+  const etiquetas = obtenerEtiquetasLibro(tarjeta);
 
   return {
     id: normalizarIdLibro(tarjeta.dataset.bookId || titulo),
     titulo,
+    autor: tarjeta.dataset.autor || "Autor no registrado",
     categoria: tarjeta.querySelector(".book-category")?.textContent?.trim() || "",
     materia: tarjeta.dataset.materia || "",
     grado: tarjeta.dataset.grado || "",
     anio: tarjeta.dataset.anio || "",
     idioma: tarjeta.dataset.idioma || "",
     descripcion,
+    etiquetas,
     imagen: imageElement ? imageElement.src : "",
     href: tarjeta.querySelector("a")?.href || window.location.href,
     origen: "recomendados"
@@ -258,15 +277,28 @@ function coincideConFiltro(tarjeta, nombreFiltro) {
   return valorFiltro === "todos" || etiquetaLibro === valorFiltro;
 }
 
-function coincideConBusqueda(tarjeta) {
-  const textoBuscado = buscador ? buscador.value.trim().toLowerCase() : "";
-  const titulo = (tarjeta.dataset.titulo || "").toLowerCase();
+function normalizarTextoBusqueda(valor) {
+  return String(valor || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-  return textoBuscado === "" || titulo.includes(textoBuscado);
+function coincideConBusqueda(tarjeta) {
+  const textoBuscado = normalizarTextoBusqueda(buscador ? buscador.value : "");
+  const titulo = normalizarTextoBusqueda(tarjeta.dataset.titulo || "");
+  const autor = normalizarTextoBusqueda(tarjeta.dataset.autor || "");
+  const textoCoincidente = `${titulo} ${autor}`.trim();
+
+  return textoBuscado === "" || textoCoincidente.includes(textoBuscado);
 }
 
 function aplicarFiltros() {
   let cantidadVisible = 0;
+  const textoBusqueda = buscador ? buscador.value.trim() : "";
 
   tarjetas.forEach((tarjeta) => {
     const debeMostrarse =
@@ -286,6 +318,14 @@ function aplicarFiltros() {
   });
 
   if (resultadoFiltros) {
+    if (textoBusqueda) {
+      resultadoFiltros.textContent =
+        cantidadVisible === 1
+          ? `Mostrando 1 libro para "${textoBusqueda}".`
+          : `Mostrando ${cantidadVisible} libros para "${textoBusqueda}".`;
+      return;
+    }
+
     resultadoFiltros.textContent =
       cantidadVisible === 1
         ? "Mostrando 1 libro."
@@ -330,9 +370,17 @@ tarjetas.forEach((tarjeta) => {
   }
 });
 
+if (buscador) {
+  buscador.addEventListener("input", aplicarFiltros);
+}
+
 if (botonFiltrar) {
   botonFiltrar.addEventListener("click", aplicarFiltros);
 }
+
+filtros.forEach((filtro) => {
+  filtro.addEventListener("change", aplicarFiltros);
+});
 
 if (botonEstadisticas) {
   botonEstadisticas.addEventListener("click", abrirEstadisticasLectura);
