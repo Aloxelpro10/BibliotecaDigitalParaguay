@@ -144,8 +144,18 @@ function renderizarFavoritos() {
   }
 
   listaFavoritos.innerHTML = libros
-    .map(
-      (libro) => `
+    .map((libro) => {
+      const etiquetas = Array.isArray(libro.etiquetas) && libro.etiquetas.length
+        ? libro.etiquetas
+        : [
+            libro.autor ? `Autor: ${libro.autor}` : "Autor: no registrado",
+            libro.materia || "General",
+            libro.grado || "Sin grado",
+            libro.anio || "Sin año",
+            libro.idioma || "Español"
+          ];
+
+      return `
         <article class="favorite-card" data-book-id="${libro.id}">
           <label class="favorite-select-option" aria-label="Seleccionar libro">
             <input
@@ -162,10 +172,7 @@ function renderizarFavoritos() {
             <h2>${libro.titulo}</h2>
             <p>${libro.descripcion || "Libro guardado por el usuario en la colección de favoritos."}</p>
             <ul class="tag-list">
-              <li>${libro.materia || "General"}</li>
-              <li>${libro.grado || "Sin grado"}</li>
-              <li>${libro.anio || "Sin año"}</li>
-              <li>${libro.idioma || "Español"}</li>
+              ${etiquetas.map((etiqueta) => `<li>${etiqueta}</li>`).join("")}
             </ul>
             <div class="favorite-actions">
               <a class="secondary-button" href="${libro.href || "Inicio.html"}">Ver libro</a>
@@ -173,8 +180,8 @@ function renderizarFavoritos() {
             </div>
           </div>
         </article>
-      `
-    )
+      `;
+    })
     .join("");
 
   document.querySelectorAll(".favorite-select").forEach((checkbox) => {
