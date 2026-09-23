@@ -84,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return {
       id: normalizarIdLibro(idLibro || tarjeta.dataset.bookId || titulo),
       titulo,
+      autor: tarjeta.dataset.autor || "Autor no registrado",
       categoria: tarjeta.querySelector(".book-category")?.textContent?.trim() || "",
       materia: tarjeta.dataset.materia || "",
       grado: tarjeta.dataset.grado || "",
@@ -95,6 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
       origen: "recomendados"
     };
   };
+
 
   const obtenerFavoritos = () => {
     try {
@@ -130,6 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const libro = libroDesdeInicio || {
         id: idLibro,
         titulo,
+        autor: document.querySelector(".book-author")?.textContent?.replace(/^Autor:\s*/i, "") || "Autor no registrado",
         descripcion: "Libro guardado en favoritos.",
         imagen: image,
         href: pageUrl
