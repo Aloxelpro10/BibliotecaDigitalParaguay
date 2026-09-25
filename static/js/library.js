@@ -42,6 +42,7 @@ const buscador = document.querySelector("[data-buscador]");
 const filtros = Array.from(document.querySelectorAll("[data-filtro]"));
 const botonFiltrar = document.querySelector("[data-aplicar-filtros]");
 const resultadoFiltros = document.querySelector("[data-resultado-filtros]");
+const checkboxModoInstitucional = document.querySelector("[data-solo-institucion]");
 
 function guardarSeguimiento() {
   localStorage.setItem(CLAVE_SEGUIMIENTO, JSON.stringify(Array.from(librosLeidos)));
@@ -287,6 +288,20 @@ function normalizarTextoBusqueda(valor) {
     .trim();
 }
 
+function esLibroInstitucional(tarjeta) {
+  const valor = String(tarjeta.dataset.institucion || "").trim().toLowerCase();
+
+  return [
+    "true",
+    "1",
+    "si",
+    "yes",
+    "institucion",
+    "de_la_institucion",
+    "de la institucion"
+  ].includes(valor);
+}
+
 function coincideConBusqueda(tarjeta) {
   const textoBuscado = normalizarTextoBusqueda(buscador ? buscador.value : "");
   const titulo = normalizarTextoBusqueda(tarjeta.dataset.titulo || "");
@@ -299,6 +314,7 @@ function coincideConBusqueda(tarjeta) {
 function aplicarFiltros() {
   let cantidadVisible = 0;
   const textoBusqueda = buscador ? buscador.value.trim() : "";
+  const modoInstitucional = Boolean(checkboxModoInstitucional && checkboxModoInstitucional.checked);
 
   tarjetas.forEach((tarjeta) => {
     const debeMostrarse =
@@ -306,7 +322,8 @@ function aplicarFiltros() {
       coincideConFiltro(tarjeta, "materia") &&
       coincideConFiltro(tarjeta, "grado") &&
       coincideConFiltro(tarjeta, "anio") &&
-      coincideConFiltro(tarjeta, "idioma");
+      coincideConFiltro(tarjeta, "idioma") &&
+      (!modoInstitucional || esLibroInstitucional(tarjeta));
 
     tarjeta.hidden = !debeMostrarse;
     tarjeta.classList.toggle("is-filtered-out", !debeMostrarse);
@@ -318,6 +335,17 @@ function aplicarFiltros() {
   });
 
   if (resultadoFiltros) {
+    if (modoInstitucional) {
+      if (cantidadVisible === 0) {
+        resultadoFiltros.textContent = "No hay libros de la institución con los filtros actuales.";
+      } else if (cantidadVisible === 1) {
+        resultadoFiltros.textContent = "Mostrando 1 libro de la institución.";
+      } else {
+        resultadoFiltros.textContent = `Mostrando ${cantidadVisible} libros de la institución.`;
+      }
+      return;
+    }
+
     if (textoBusqueda) {
       resultadoFiltros.textContent =
         cantidadVisible === 1
@@ -372,6 +400,10 @@ tarjetas.forEach((tarjeta) => {
 
 if (buscador) {
   buscador.addEventListener("input", aplicarFiltros);
+}
+
+if (checkboxModoInstitucional) {
+  checkboxModoInstitucional.addEventListener("change", aplicarFiltros);
 }
 
 if (botonFiltrar) {
