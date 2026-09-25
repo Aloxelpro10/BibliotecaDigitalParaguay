@@ -103,6 +103,7 @@
           <option value="2020">2020</option>
           <option value="2021">2021</option>
           <option value="2022">2022</option>
+          <option value="2023">2023</option>
           <option value="2024">2024</option>
           <option value="2025">2025</option>
           <option value="2026">2026</option>
@@ -116,13 +117,19 @@
           <option value="espanol">Español</option>
           <option value="guarani">Guarani</option>
           <option value="ingles">Ingles</option>
+          <option value="portugues">Portugues</option>
         </select>
       </label>
-
-      <button type="button" class="clear-button" data-aplicar-filtros>Filtrar</button>
     </section>
 
-    <p class="filter-result" data-resultado-filtros>Mostrando todos los libros.</p>
+    <div class="filter-results-bar">
+      <p class="filter-result" data-resultado-filtros>Mostrando todos los libros.</p>
+
+      <label class="institutional-mode" for="solo-estudiantil">
+        <input id="solo-estudiantil" type="checkbox" data-solo-institucion>
+        <span>Ver libros de la institución</span>
+      </label>
+    </div>
 
     <section class="book-grid" aria-label="Listado de libros">
       <article
@@ -134,6 +141,7 @@
         data-grado="3a"
         data-anio="2024"
         data-idioma="espanol"
+        data-institucion="true"
       >
         <img src="biblioteca_libros/portadas/Fundamentos de la programación 5.webp" alt="Portada del libro Fundamentos de la Programacion">
         <div class="book-info">
@@ -164,6 +172,7 @@
         data-grado="2"
         data-anio="2025"
         data-idioma="espanol"
+        data-institucion="true"
       >
         <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Literatura Paraguaya">
         <div class="book-info">
@@ -209,6 +218,36 @@
           </ul>
           <div class="book-actions">
             <a class="secondary-button" href="/libros/pdfs/ciencias-basicas.pdf">Ver detalles</a>
+            <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
+            <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
+          </div>
+        </div>
+      </article>
+
+      <article
+        class="book-card"
+        data-book-id="literatura-paraguaya"
+        data-titulo="Literatura Paraguaya"
+        data-autor="prueba"
+        data-materia="literatura"
+        data-grado="2"
+        data-anio="2025"
+        data-idioma="espanol"
+      >
+        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Literatura Paraguaya">
+        <div class="book-info">
+          <p class="book-category">Literatura</p>
+          <h2>Literatura Paraguaya</h2>
+          <p>Lecturas seleccionadas para conocer autores, movimientos y textos nacionales.</p>
+          <ul class="tag-list" aria-label="Etiquetas del libro">
+            <li>Literatura</li>
+            <li>Autor: prueba</li>
+            <li>2 curso</li>
+            <li>2025</li>
+            <li>Español</li>
+          </ul>
+          <div class="book-actions">
+            <a class="secondary-button" href="/libros/pdfs/literatura-paraguaya.pdf">Ver detalles</a>
             <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
             <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
           </div>
