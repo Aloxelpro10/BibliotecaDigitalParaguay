@@ -341,11 +341,41 @@ a {
   background: #edf3ef;
 }
 
+.filter-results-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
 .filter-result {
-  margin: 0 0 18px;
+  margin: 0;
   color: var(--muted);
   font-size: 0.95rem;
   font-weight: 700;
+}
+
+.institutional-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(15, 124, 107, 0.06);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.institutional-mode input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
 }
 
 .book-grid {
