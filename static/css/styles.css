@@ -14,7 +14,7 @@
   box-sizing: border-box;
 }
 
-body {
+  body {
     margin: 0;
     min-height: 100vh;
     color: white;
@@ -46,12 +46,19 @@ a {
 }
 
 .home-page {
-  /* Cambia esta ruta por tu mosaico real de libros cuando tengas la imagen. */
-  background-image:
-    linear-gradient(rgba(16, 27, 35, 0.58), rgba(16, 27, 35, 0.58)),
-    url("../img/mosaico-libros.jpg");
-  background-position: center;
-  background-size: cover;
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.home-page::before {
+  position: fixed;
+  z-index: -1;
+  inset: -5px;
+  content: "";
+  background: linear-gradient(rgba(16, 27, 35, 0.2), rgba(16, 27, 35, 0.2)),
+    url("../img/fondo_pag.png") center / cover no-repeat;
+  filter: blur(3px);
 }
 
 .hero {
@@ -69,7 +76,7 @@ a {
 
 .eyebrow {
   margin: 0 0 12px;
-  color: var(--gold);
+  color:black;
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.12em;
