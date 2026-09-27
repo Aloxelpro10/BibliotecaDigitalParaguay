@@ -131,7 +131,7 @@
       </label>
     </div>
 
-    <section class="book-grid" aria-label="Listado de libros">
+    <section class="book-grid" data-catalogo-container data-page-size="20" aria-label="Listado de libros">
       <article
         class="book-card"
         data-book-id="Fundamentos-de-la-programacion"
@@ -143,7 +143,7 @@
         data-idioma="espanol"
         data-institucion="true"
       >
-        <img src="biblioteca_libros/portadas/Fundamentos de la programación 5.webp" alt="Portada del libro Fundamentos de la Programacion">
+        <img src="biblioteca_libros/portadas/Fundamentos de la programación 5.webp" alt="Portada del libro Fundamentos de la Programacion" loading="lazy" decoding="async">
         <div class="book-info">
           <p class="book-category">Informática</p>
           <h2>Fundamentos de la Programacion Vol. 5</h2>
@@ -174,7 +174,7 @@
         data-idioma="espanol"
         data-institucion="true"
       >
-        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Literatura Paraguaya">
+        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Literatura Paraguaya" loading="lazy" decoding="async">
         <div class="book-info">
           <p class="book-category">Literatura</p>
           <h2>Literatura Paraguaya</h2>
@@ -204,7 +204,7 @@
         data-anio="2024"
         data-idioma="espanol"
       >
-        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Ciencias Basicas">
+        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Ciencias Basicas" loading="lazy" decoding="async">
         <div class="book-info">
           <p class="book-category">Ciencias</p>
           <h2>Ciencias Basicas</h2>
@@ -226,18 +226,18 @@
 
       <article
         class="book-card"
-        data-book-id="literatura-paraguaya"
-        data-titulo="Literatura Paraguaya"
+        data-book-id="literatura-paraguaya-2"
+        data-titulo="Literatura Paraguaya 2"
         data-autor="prueba"
         data-materia="literatura"
         data-grado="2"
         data-anio="2025"
         data-idioma="espanol"
       >
-        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Literatura Paraguaya">
+        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Literatura Paraguaya 2" loading="lazy" decoding="async">
         <div class="book-info">
           <p class="book-category">Literatura</p>
-          <h2>Literatura Paraguaya</h2>
+          <h2>Literatura Paraguaya 2</h2>
           <p>Lecturas seleccionadas para conocer autores, movimientos y textos nacionales.</p>
           <ul class="tag-list" aria-label="Etiquetas del libro">
             <li>Literatura</li>
@@ -254,6 +254,13 @@
         </div>
       </article>
     </section>
+
+    <div class="pagination-controls" aria-label="Paginación del catálogo">
+      <button type="button" class="secondary-button pagination-button" data-page-action="prev">Anterior</button>
+      <span class="pagination-status" data-pagination-status>1 / 1</span>
+      <button type="button" class="secondary-button pagination-button" data-page-action="next">Siguiente</button>
+    </div>
+
     <section class="communication-strip" aria-label="Comunicacion con la biblioteca">
       <div>
         <p class="eyebrow">Comunicación</p>
