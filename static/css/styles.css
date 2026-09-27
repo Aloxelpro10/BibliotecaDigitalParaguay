@@ -392,6 +392,26 @@ a {
   gap: 18px;
 }
 
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 22px 0 30px;
+}
+
+.pagination-button {
+  min-width: 120px;
+}
+
+.pagination-status {
+  min-width: 100px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-align: center;
+}
+
 .book-card {
   display: flex;
   min-width: 0;
