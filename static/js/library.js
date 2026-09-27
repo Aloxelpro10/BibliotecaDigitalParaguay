@@ -31,7 +31,12 @@ const normalizarFavoritos = (libros) => {
 
 const librosGuardados = JSON.parse(localStorage.getItem(CLAVE_SEGUIMIENTO) || "[]");
 const librosLeidos = new Set(librosGuardados);
-const tarjetas = Array.from(document.querySelectorAll("[data-book-id]"));
+const catalogoContainer = document.querySelector("[data-catalogo-container]");
+const LIBROS_POR_PAGINA = Number(catalogoContainer?.dataset?.pageSize || 20);
+const tarjetas = Array.from(
+  (catalogoContainer || document).querySelectorAll(".book-card[data-book-id]")
+);
+const estadoCatalogo = { paginaActual: 1 };
 const contadorResumen = document.querySelector("[data-summary-count]");
 const botonEstadisticas = document.querySelector("[data-open-reading-stats]");
 const modalEstadisticas = document.getElementById("reading-stat-modal");
@@ -43,6 +48,9 @@ const filtros = Array.from(document.querySelectorAll("[data-filtro]"));
 const botonFiltrar = document.querySelector("[data-aplicar-filtros]");
 const resultadoFiltros = document.querySelector("[data-resultado-filtros]");
 const checkboxModoInstitucional = document.querySelector("[data-solo-institucion]");
+const botonPaginaAnterior = document.querySelector("[data-page-action='prev']");
+const botonPaginaSiguiente = document.querySelector("[data-page-action='next']");
+const estadoPaginacion = document.querySelector("[data-pagination-status]");
 
 function guardarSeguimiento() {
   localStorage.setItem(CLAVE_SEGUIMIENTO, JSON.stringify(Array.from(librosLeidos)));
@@ -311,28 +319,64 @@ function coincideConBusqueda(tarjeta) {
   return textoBuscado === "" || textoCoincidente.includes(textoBuscado);
 }
 
-function aplicarFiltros() {
-  let cantidadVisible = 0;
-  const textoBusqueda = buscador ? buscador.value.trim() : "";
+function obtenerLibrosFiltrados() {
+  const textoBusqueda = buscador ? buscador.value : "";
   const modoInstitucional = Boolean(checkboxModoInstitucional && checkboxModoInstitucional.checked);
 
+  return tarjetas.filter((tarjeta) => {
+    const coincideBusqueda = coincideConBusqueda(tarjeta);
+    const coincideMateria = coincideConFiltro(tarjeta, "materia");
+    const coincideGrado = coincideConFiltro(tarjeta, "grado");
+    const coincideAnio = coincideConFiltro(tarjeta, "anio");
+    const coincideIdioma = coincideConFiltro(tarjeta, "idioma");
+    const coincideInstitucion = !modoInstitucional || esLibroInstitucional(tarjeta);
+
+    return (
+      coincideBusqueda &&
+      coincideMateria &&
+      coincideGrado &&
+      coincideAnio &&
+      coincideIdioma &&
+      coincideInstitucion
+    );
+  });
+}
+
+function actualizarPaginacionVisual() {
+  const librosFiltrados = obtenerLibrosFiltrados();
+  const totalPaginas = Math.max(1, Math.ceil(librosFiltrados.length / LIBROS_POR_PAGINA));
+
+  estadoCatalogo.paginaActual = Math.min(estadoCatalogo.paginaActual, totalPaginas);
+
+  if (estadoPaginacion) {
+    estadoPaginacion.textContent = librosFiltrados.length === 0 ? "0 / 0" : `${estadoCatalogo.paginaActual} / ${totalPaginas}`;
+  }
+
+  if (botonPaginaAnterior) {
+    botonPaginaAnterior.disabled = librosFiltrados.length === 0 || estadoCatalogo.paginaActual === 1;
+  }
+
+  if (botonPaginaSiguiente) {
+    botonPaginaSiguiente.disabled = librosFiltrados.length === 0 || estadoCatalogo.paginaActual >= totalPaginas;
+  }
+
+  const inicio = (estadoCatalogo.paginaActual - 1) * LIBROS_POR_PAGINA;
+  const fin = inicio + LIBROS_POR_PAGINA;
+  const librosEnPagina = librosFiltrados.slice(inicio, fin);
+  const idsPagina = new Set(librosEnPagina.map((tarjeta) => String(tarjeta.dataset.bookId || tarjeta.dataset.titulo || "")));
+
   tarjetas.forEach((tarjeta) => {
-    const debeMostrarse =
-      coincideConBusqueda(tarjeta) &&
-      coincideConFiltro(tarjeta, "materia") &&
-      coincideConFiltro(tarjeta, "grado") &&
-      coincideConFiltro(tarjeta, "anio") &&
-      coincideConFiltro(tarjeta, "idioma") &&
-      (!modoInstitucional || esLibroInstitucional(tarjeta));
+    const idTarjeta = String(tarjeta.dataset.bookId || tarjeta.dataset.titulo || "");
+    const debeMostrarse = idsPagina.has(idTarjeta);
 
     tarjeta.hidden = !debeMostrarse;
     tarjeta.classList.toggle("is-filtered-out", !debeMostrarse);
     tarjeta.style.display = debeMostrarse ? "" : "none";
-
-    if (debeMostrarse) {
-      cantidadVisible += 1;
-    }
   });
+
+  const textoBusqueda = buscador ? buscador.value.trim() : "";
+  const modoInstitucional = Boolean(checkboxModoInstitucional && checkboxModoInstitucional.checked);
+  const cantidadVisible = librosFiltrados.length;
 
   if (resultadoFiltros) {
     if (modoInstitucional) {
@@ -359,6 +403,24 @@ function aplicarFiltros() {
         ? "Mostrando 1 libro."
         : `Mostrando ${cantidadVisible} libros.`;
   }
+}
+
+function aplicarFiltros() {
+  estadoCatalogo.paginaActual = 1;
+  actualizarPaginacionVisual();
+}
+
+function cambiarPagina(direccion) {
+  const librosFiltrados = obtenerLibrosFiltrados();
+  const totalPaginas = Math.max(1, Math.ceil(librosFiltrados.length / LIBROS_POR_PAGINA));
+
+  if (librosFiltrados.length === 0) {
+    return;
+  }
+
+  const siguientePagina = Math.min(totalPaginas, Math.max(1, estadoCatalogo.paginaActual + direccion));
+  estadoCatalogo.paginaActual = siguientePagina;
+  actualizarPaginacionVisual();
 }
 
 tarjetas.forEach((tarjeta) => {
@@ -410,9 +472,19 @@ if (botonFiltrar) {
   botonFiltrar.addEventListener("click", aplicarFiltros);
 }
 
+if (botonPaginaAnterior) {
+  botonPaginaAnterior.addEventListener("click", () => cambiarPagina(-1));
+}
+
+if (botonPaginaSiguiente) {
+  botonPaginaSiguiente.addEventListener("click", () => cambiarPagina(1));
+}
+
 filtros.forEach((filtro) => {
   filtro.addEventListener("change", aplicarFiltros);
 });
+
+actualizarPaginacionVisual();
 
 if (botonEstadisticas) {
   botonEstadisticas.addEventListener("click", abrirEstadisticasLectura);
