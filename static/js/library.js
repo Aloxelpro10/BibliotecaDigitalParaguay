@@ -1,787 +1,1090 @@
-const CLAVE_SEGUIMIENTO = "bdp_read_books";
-const CLAVE_FAVORITOS = "bdp_favorite_books";
-const CLAVE_CATALOGO_LIBROS = "bdp_book_catalog";
-const TIEMPO_BLOQUEO_MARCAR = 1000;
-
-const normalizarIdLibro = (valor) => {
-  const texto = String(valor || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  return texto || "libro";
-};
-
-const normalizarFavoritos = (libros) => {
-  const vistos = new Set();
-
-  return (Array.isArray(libros) ? libros : []).reduce((resultado, libro) => {
-    const id = normalizarIdLibro(libro?.id || libro?.titulo || "");
-
-    if (!vistos.has(id)) {
-      vistos.add(id);
-      resultado.push({ ...libro, id });
-    }
-
-    return resultado;
-  }, []);
-};
-
-const librosGuardados = JSON.parse(localStorage.getItem(CLAVE_SEGUIMIENTO) || "[]");
-const librosLeidos = new Set(librosGuardados);
-const catalogoContainer = document.querySelector("[data-catalogo-container]");
-const LIBROS_POR_PAGINA = Number(catalogoContainer?.dataset?.pageSize || 20);
-const tarjetas = Array.from(
-  (catalogoContainer || document).querySelectorAll(".book-card[data-book-id]")
-);
-const estadoCatalogo = { paginaActual: 1 };
-const contadorResumen = document.querySelector("[data-summary-count]");
-const botonEstadisticas = document.querySelector("[data-open-reading-stats]");
-const modalEstadisticas = document.getElementById("reading-stat-modal");
-const modalEstadisticasTotal = document.querySelector("[data-modal-total]");
-const modalEstadisticasLista = document.querySelector("[data-modal-stats]");
-const modalEstadisticasCerrar = document.getElementById("reading-stat-close");
-const buscador = document.querySelector("[data-buscador]");
-const filtros = Array.from(document.querySelectorAll("[data-filtro]"));
-const botonFiltrar = document.querySelector("[data-aplicar-filtros]");
-const resultadoFiltros = document.querySelector("[data-resultado-filtros]");
-const checkboxModoInstitucional = document.querySelector("[data-solo-institucion]");
-const botonPaginaAnterior = document.querySelector("[data-page-action='prev']");
-const botonPaginaSiguiente = document.querySelector("[data-page-action='next']");
-const estadoPaginacion = document.querySelector("[data-pagination-status]");
-
-function guardarSeguimiento() {
-  localStorage.setItem(CLAVE_SEGUIMIENTO, JSON.stringify(Array.from(librosLeidos)));
+:root {
+  --ink: #17212b;
+  --muted: #bfd2ef;
+  --paper: #f7f4ed;
+  --surface: #123d63;
+  --line: rgba(255, 255, 255, 0.18);
+  --accent: #0f7c6b;
+  --accent-dark: #09584d;
+  --gold: #d39c35;
+  --shadow: 0 18px 50px rgba(18, 61, 99, 0.28);
 }
 
-function guardarFavoritos(librosFavoritos) {
-  localStorage.setItem(CLAVE_FAVORITOS, JSON.stringify(normalizarFavoritos(librosFavoritos)));
+* {
+  box-sizing: border-box;
 }
 
-function obtenerFavoritos() {
-  try {
-    return normalizarFavoritos(JSON.parse(localStorage.getItem(CLAVE_FAVORITOS) || "[]"));
-  } catch (error) {
-    return [];
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: white;
+    background-image: linear-gradient(135deg, #17212b 0%, #4c5a6b 50%, #758396 100%);
+    background-attachment: fixed;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body.library-page-bg {
+  background-image: url("../img/fondo_pag.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.favorites-page {
+  min-height: 100vh;
+  background-image: url("../img/fondo_pag.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-page {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.home-page::before {
+  position: fixed;
+  z-index: -1;
+  inset: -5px;
+  content: "";
+  background: linear-gradient(rgba(16, 27, 35, 0.2), rgba(16, 27, 35, 0.2)),
+    url("../img/fondo_pag.png") center / cover no-repeat;
+  filter: blur(3px);
+}
+
+.hero {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px;
+}
+
+.hero-content {
+  width: min(760px, 100%);
+  color: #ffffff;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0 0 12px;
+  color:black;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.hero h1,
+.intro-panel h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.7rem, 8vw, 5.7rem);
+  line-height: 0.98;
+}
+
+.hero-copy {
+  max-width: 610px;
+  margin: 22px auto 32px;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 1.12rem;
+  line-height: 1.65;
+}
+
+.primary-button,
+.secondary-button,
+.read-toggle,
+.clear-button,
+.favorite-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 18px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-button {
+  min-width: 180px;
+  color: #ffffff;
+  background: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.primary-button:hover,
+.read-toggle:hover {
+  background: var(--accent-dark);
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px clamp(18px, 4vw, 56px);
+  background: rgba(247, 244, 237, 0.94);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(14px);
+}
+
+.brand {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.main-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.main-nav a[aria-current="page"],
+.main-nav a:hover {
+  color: var(--accent-dark);
+}
+
+.library-layout {
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 42px 0 60px;
+}
+
+.intro-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 30px;
+}
+
+.intro-panel h1 {
+  font-size: clamp(2.2rem, 6vw, 4.5rem);
+}
+
+.intro-panel p:not(.eyebrow) {
+  max-width: 720px;
+  color: var(--muted);
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+
+.reading-summary {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.summary-inline,
+.summary-actions,
+.summary-subline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.summary-number,
+.summary-progress {
+  color: var(--accent-dark);
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.summary-label,
+.compact-progress-label,
+.summary-subline {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.stats-button {
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+.progress-meter {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.progress-bar {
+  display: block;
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--gold), var(--accent));
+  transition: width 0.2s ease;
+}
+
+.progress-breakdown {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.progress-breakdown li,
+.stat-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #edf5ff;
+  font-size: 0.8rem;
+}
+
+.progress-breakdown .progress-topline,
+.stat-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mini-meter {
+  height: 10px;
+}
+
+.stats-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(18, 61, 99, 0.06);
+}
+
+.stats-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.stat-row-empty {
+  padding: 16px 12px;
+  border-radius: 10px;
+  background: rgba(18, 61, 99, 0.04);
+  color: var(--ink);
+}
+
+.reading-stats-modal .favorites-confirm-dialog {
+  max-width: 520px;
+}
+
+.filter-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) repeat(4, minmax(130px, 1fr)) auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.filter-panel label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.filter-panel input,
+.filter-panel select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: var(--ink);
+  background: #ffffff;
+  font: inherit;
+  text-transform: none;
+}
+
+.filter-panel input:focus,
+.filter-panel select:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgba(15, 124, 107, 0.16);
+}
+
+.clear-button {
+  color: var(--accent-dark);
+  background: #edf3ef;
+}
+
+.filter-results-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.filter-result {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.institutional-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(15, 124, 107, 0.06);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.institutional-mode input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.book-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin: 22px 0 30px;
+}
+
+.pagination-button {
+  min-width: 120px;
+}
+
+.pagination-status {
+  min-width: 100px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.book-card {
+  display: flex;
+  min-width: 0;
+  min-height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgba(23, 33, 43, 0.08);
+}
+
+.book-card.is-filtered-out {
+  display: none;
+}
+
+.book-card img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: #dfe7e1;
+}
+
+.book-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: 18px;
+}
+
+.book-category {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.book-info h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.45rem;
+}
+
+.book-info p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-list li {
+  border: 1px solid #cbded7;
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--accent-dark);
+  background: #f3faf7;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.featured-book {
+  border-color: rgba(211, 156, 53, 0.8);
+}
+
+.book-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: auto;
+}
+
+.secondary-button,
+.read-toggle,
+.favorite-button {
+  width: 100%;
+  min-width: 0;
+}
+
+.secondary-button {
+  color: var(--accent-dark);
+  background: #e7f2ee;
+}
+
+.read-toggle {
+  color: #ffffff;
+  background: var(--accent);
+}
+
+.favorite-button {
+  grid-column: 1 / -1;
+  color: #ffffff;
+  background: var(--accent-dark);
+}
+
+.favorite-button.is-favorite {
+  color: var(--accent-dark);
+  background: #dfeee9;
+}
+
+.book-card.is-read {
+  border-color: rgba(15, 124, 107, 0.48);
+}
+
+.book-card.is-read .read-toggle {
+  color: var(--accent-dark);
+  background: #d6ece5;
+}
+
+.favorites-page {
+  min-height: 100vh;
+  background: #f6f3ee;
+}
+
+.favorites-layout {
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 42px 0 60px;
+}
+
+.favorites-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 30px;
+}
+
+.favorites-header h1 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.2rem, 6vw, 4rem);
+}
+
+.favorites-summary {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.favorites-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.favorite-select-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(18, 61, 99, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--surface);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.favorite-select-all input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--surface);
+}
+
+.favorites-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.favorite-card {
+  position: relative;
+}
+
+.favorite-select-option {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 18px rgba(18, 61, 99, 0.18);
+}
+
+.favorite-select {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--surface);
+}
+
+.favorite-card .favorite-select-option:has(.favorite-select:not([hidden])) {
+  display: inline-flex;
+}
+
+.favorite-card {
+  display: grid;
+  grid-template-columns: minmax(170px, 240px) minmax(0, 1fr);
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgba(23, 33, 43, 0.08);
+}
+
+.favorite-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  max-height: 100%;
+  padding: 12px;
+  object-fit: contain;
+  background: linear-gradient(135deg, #0d74b8 0%, #0a5c9c 100%);
+  box-sizing: border-box;
+}
+
+.favorite-card-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: 18px;
+}
+
+.favorite-card-content h2 {
+  margin: 0 0 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.4rem;
+}
+
+.favorite-card-content p {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.favorite-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.favorites-empty {
+  grid-column: 1 / -1;
+  padding: 26px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  text-align: center;
+}
+
+.communication-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  width: min(1180px, calc(100% - 36px));
+  margin: 28px auto 30px;
+  padding: 28px 30px;
+  border: 1px solid rgba(18, 61, 99, 0.12);
+  border-radius: 18px;
+  background: rgba(32, 96, 206, 0.6);
+  box-shadow: 0 12px 28px rgba(23, 33, 43, 0.08);
+}
+
+.communication-strip h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+}
+
+.communication-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.communication-button {
+  flex: 0 0 180px;
+  width: 180px;
+  min-width: 180px;
+}
+
+.request-section {
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 34px 28px 12px;
+  border: 1px solid rgba(18, 61, 99, 0.12);
+  border-radius: 18px;
+  background: rgba(32, 96, 206, 0.6);
+  box-shadow: 0 12px 28px rgba(23, 33, 43, 0.05);
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  margin: 0 0 10px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.section-header p:last-child {
+  max-width: 760px;
+  margin: 0;
+  color: #3a4d5d;
+  line-height: 1.6;
+}
+
+.upload-request-form {
+  display: grid;
+  gap: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.upload-request-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.upload-request-form input,
+.upload-request-form textarea {
+  width: 100%;
+  border: 1px solid rgba(129, 183, 255, 0.28);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: rgba(8, 24, 39, 0.7);
+  color: #edf7ff;
+  font: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.upload-request-form input::placeholder,
+.upload-request-form textarea::placeholder {
+  color: rgba(237, 247, 255, 0.7);
+}
+
+.upload-request-form textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.upload-request-form input:focus,
+.upload-request-form textarea:focus {
+  border-color: rgba(126, 197, 255, 0.75);
+  outline: 3px solid rgba(126, 197, 255, 0.18);
+  background: rgba(8, 24, 39, 0.82);
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 10px;
+}
+
+.form-warning-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.form-warning {
+  flex: 1;
+  margin: 0;
+  color: #3a4d5d;
+  line-height: 1.6;
+}
+
+.form-warning-button {
+  white-space: nowrap;
+}
+
+.form-status {
+  min-height: 20px;
+  margin: 0;
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.site-footer {
+  margin-top: 38px;
+  padding: 34px 0 26px;
+  background: rgba(18, 33, 45, 0.96);
+  color: #dfeaf6;
+}
+
+.footer-grid {
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 22px;
+}
+
+.footer-brand h3,
+.footer-column h4 {
+  margin: 0 0 14px;
+  color: #ffffff;
+}
+
+.footer-brand p,
+.footer-column li,
+.footer-column a,
+.footer-bottom p {
+  color: rgba(223, 234, 246, 0.8);
+  line-height: 1.7;
+}
+
+.footer-column ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer-column li + li {
+  margin-top: 8px;
+}
+
+.footer-bottom {
+  width: min(1180px, calc(100% - 36px));
+  margin: 18px auto 0;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.712);
+}
+
+.footer-bottom p {
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .communication-strip,
+  .footer-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .communication-strip {
+    display: grid;
+    gap: 18px;
+  }
+
+  .footer-grid {
+    display: grid;
   }
 }
 
-function guardarCatalogoLibros(catalogo) {
-  localStorage.setItem(CLAVE_CATALOGO_LIBROS, JSON.stringify(catalogo));
-}
+@media (max-width: 620px) {
+  .library-layout,
+  .favorites-layout {
+    width: min(100% - 22px, 1180px);
+  }
 
-function obtenerCatalogoLibros() {
-  try {
-    return JSON.parse(localStorage.getItem(CLAVE_CATALOGO_LIBROS) || "{}");
-  } catch (error) {
-    return {};
+  .filter-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .book-grid,
+  .favorites-list {
+    grid-template-columns: 1fr;
+  }
+
+  .communication-button {
+    width: 100%;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 
-function sincronizarCatalogoDesdeInicio() {
-  const catalogo = {};
-
-  tarjetas.forEach((tarjeta) => {
-    const datosLibro = construirDatosLibro(tarjeta);
-    catalogo[normalizarIdLibro(datosLibro.id)] = datosLibro;
-  });
-
-  guardarCatalogoLibros(catalogo);
+.favorites-empty h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
 }
 
-function alternarFavoritoPorId(bookId, datosLibro) {
-  const idObjetivo = normalizarIdLibro(bookId || datosLibro?.id || "");
-  const catalogo = obtenerCatalogoLibros();
-  const datosBase = catalogo[idObjetivo] || datosLibro || {};
-  const favoritos = obtenerFavoritos();
-  const indice = favoritos.findIndex((libro) => normalizarIdLibro(libro.id) === idObjetivo);
+.favorites-confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: none;
+  place-items: center;
+}
 
-  if (indice >= 0) {
-    favoritos.splice(indice, 1);
-  } else {
-    favoritos.unshift({
-      ...datosBase,
-      id: idObjetivo,
-      titulo: datosBase?.titulo || datosLibro?.titulo || "Sin título",
-      autor: datosBase?.autor || datosLibro?.autor || "Autor no registrado",
-      etiquetas: datosBase?.etiquetas || datosLibro?.etiquetas || [],
-      descripcion: datosBase?.descripcion || datosLibro?.descripcion || "Libro guardado en favoritos."
-    });
+.favorites-confirm-modal:not([hidden]) {
+  display: grid;
+}
+
+.favorites-confirm-modal[hidden] {
+  display: none !important;
+}
+
+.favorites-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 20, 32, 0.55);
+}
+
+.favorites-confirm-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 30px, 420px);
+  padding: 22px 20px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: 0 22px 50px rgba(18, 61, 99, 0.35);
+  color: #ffffff;
+  text-align: center;
+}
+
+.favorites-confirm-dialog h2 {
+  margin: 0 0 12px;
+  font-size: 1.4rem;
+  color: #ffffff;
+}
+
+.favorites-confirm-dialog p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.favorites-confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.favorites-confirm-actions .secondary-button,
+.favorites-confirm-actions .clear-button {
+  min-width: 120px;
+}
+
+#delete-selected-favorites {
+  min-width: 150px;
+}
+
+@media (max-width: 850px) {
+  .favorites-header,
+  .favorites-list {
+    grid-template-columns: 1fr;
   }
 
-  guardarFavoritos(favoritos);
-  return obtenerFavoritos();
-}
-
-window.bdpToggleFavorito = alternarFavoritoPorId;
-
-function obtenerEtiquetasLibro(tarjeta) {
-  const etiquetas = Array.from(tarjeta.querySelectorAll(".tag-list li"))
-    .map((item) => item.textContent?.trim())
-    .filter(Boolean);
-
-  const autor = (tarjeta.dataset.autor || "").trim();
-
-  if (autor && !etiquetas.some((etiqueta) => etiqueta.toLowerCase() === `${autor}`.toLowerCase())) {
-    etiquetas.unshift(`${autor}`);
+  .intro-panel,
+  .filter-panel {
+    grid-template-columns: 1fr;
   }
 
-  return etiquetas.length ? etiquetas : [tarjeta.querySelector(".book-category")?.textContent?.trim() || "Libro"];
-}
-
-function construirDatosLibro(tarjeta) {
-  const imageElement = tarjeta.querySelector("img");
-  const titulo = tarjeta.dataset.titulo || tarjeta.querySelector("h2")?.textContent?.trim() || "Sin título";
-  const descripcion = tarjeta.querySelector(".book-info p:not(.book-category)")?.textContent?.trim() || "";
-  const etiquetas = obtenerEtiquetasLibro(tarjeta);
-
-  return {
-    id: normalizarIdLibro(tarjeta.dataset.bookId || titulo),
-    titulo,
-    autor: tarjeta.dataset.autor || "Autor no registrado",
-    categoria: tarjeta.querySelector(".book-category")?.textContent?.trim() || "",
-    materia: tarjeta.dataset.materia || "",
-    grado: tarjeta.dataset.grado || "",
-    anio: tarjeta.dataset.anio || "",
-    idioma: tarjeta.dataset.idioma || "",
-    descripcion,
-    etiquetas,
-    imagen: imageElement ? imageElement.src : "",
-    href: tarjeta.querySelector("a")?.href || window.location.href,
-    origen: "recomendados"
-  };
-}
-
-function actualizarEstadoFavorito(tarjeta) {
-  const botonFavorito = tarjeta.querySelector(".favorite-button");
-  if (!botonFavorito) return;
-
-  const favoritos = obtenerFavoritos();
-  const idActual = normalizarIdLibro(tarjeta.dataset.bookId || tarjeta.dataset.titulo || "");
-  const estaFavorito = favoritos.some((libro) => normalizarIdLibro(libro.id) === idActual);
-
-  botonFavorito.classList.toggle("is-favorite", estaFavorito);
-  botonFavorito.textContent = estaFavorito ? "Favorito ✓" : "Añadir a Favoritos";
-  botonFavorito.setAttribute("aria-pressed", String(estaFavorito));
-  tarjeta.dataset.favorito = estaFavorito ? "si" : "no";
-}
-
-function actualizarTarjeta(tarjeta) {
-  const idLibro = tarjeta.dataset.bookId;
-  const boton = tarjeta.querySelector("[data-read-toggle]");
-  const estaLeido = librosLeidos.has(idLibro);
-
-  tarjeta.classList.toggle("is-read", estaLeido);
-  boton.textContent = estaLeido ? "Leido" : "Marcar como leido";
-  boton.setAttribute("aria-pressed", String(estaLeido));
-}
-
-function obtenerEtiquetaMateria(materia) {
-  const valor = String(materia || "general").trim();
-
-  if (!valor) {
-    return "General";
+  .book-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
   }
 
-  return valor
-    .split("-")
-    .filter(Boolean)
-    .map((parte) => parte.charAt(0).toUpperCase() + parte.slice(1))
-    .join(" ");
-}
-
-function obtenerDistribucionLectura() {
-  const materias = new Map();
-  const librosTotalesLeidos = Array.from(librosLeidos).filter((idLibro) =>
-    tarjetas.some((tarjeta) => String(tarjeta.dataset.bookId) === String(idLibro))
-  );
-
-  librosTotalesLeidos.forEach((idLibro) => {
-    const tarjeta = tarjetas.find((item) => String(item.dataset.bookId) === String(idLibro));
-    const materia = String(tarjeta?.dataset?.materia || "general").trim() || "general";
-    const etiqueta = obtenerEtiquetaMateria(materia);
-
-    if (!materias.has(materia)) {
-      materias.set(materia, { etiqueta, total: 0 });
-    }
-
-    materias.get(materia).total += 1;
-  });
-
-  const filas = Array.from(materias.values()).sort((a, b) => b.total - a.total);
-
-  return {
-    total: librosTotalesLeidos.length,
-    filas
-  };
-}
-
-function actualizarProgresoAcademico() {
-  const { total, filas } = obtenerDistribucionLectura();
-
-  if (contadorResumen) {
-    contadorResumen.textContent = String(total);
-  }
-
-  if (modalEstadisticasTotal) {
-    modalEstadisticasTotal.textContent = String(total);
-  }
-
-  if (modalEstadisticasLista) {
-    modalEstadisticasLista.innerHTML = filas.length
-      ? filas.map((fila) => {
-          const porcentaje = total === 0 ? 0 : Math.round((fila.total / total) * 100);
-          return `
-            <div class="stat-row">
-              <div class="stat-row-top">
-                <span>${fila.etiqueta}</span>
-                <strong>${porcentaje}% Total: ${fila.total}</strong>
-              </div>
-              <div class="progress-meter mini-meter" aria-hidden="true">
-                <span class="progress-bar" style="width: ${porcentaje}%;"></span>
-              </div>
-            </div>
-          `;
-        }).join("")
-      : '<div class="stat-row-empty">Aún no has marcado libros como leídos.</div>';
+  .reading-summary {
+    width: min(100%, 320px);
   }
 }
 
-function abrirEstadisticasLectura() {
-  if (!modalEstadisticas) {
-    return;
+@media (max-width: 620px) {
+  .site-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  actualizarProgresoAcademico();
-  modalEstadisticas.hidden = false;
-  modalEstadisticas.setAttribute("aria-hidden", "false");
-  modalEstadisticas.classList.add("is-open");
-}
-
-function cerrarEstadisticasLectura() {
-  if (!modalEstadisticas) {
-    return;
+  .hero {
+    padding: 22px;
   }
 
-  modalEstadisticas.hidden = true;
-  modalEstadisticas.setAttribute("aria-hidden", "true");
-  modalEstadisticas.classList.remove("is-open");
-}
-
-function actualizarResumen() {
-  actualizarProgresoAcademico();
-}
-
-function obtenerValorFiltro(nombreFiltro) {
-  const filtro = filtros.find((selector) => selector.dataset.filtro === nombreFiltro);
-  return filtro ? filtro.value.trim().toLowerCase() : "todos";
-}
-
-function coincideConFiltro(tarjeta, nombreFiltro) {
-  const valorFiltro = obtenerValorFiltro(nombreFiltro);
-  const etiquetaLibro = (tarjeta.dataset[nombreFiltro] || "").trim().toLowerCase();
-
-  return valorFiltro === "todos" || etiquetaLibro === valorFiltro;
-}
-
-function normalizarTextoBusqueda(valor) {
-  return String(valor || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function esLibroInstitucional(tarjeta) {
-  const valor = String(tarjeta.dataset.institucion || "").trim().toLowerCase();
-
-  return [
-    "true",
-    "1",
-    "si",
-    "yes",
-    "institucion",
-    "de_la_institucion",
-    "de la institucion"
-  ].includes(valor);
-}
-
-function coincideConBusqueda(tarjeta) {
-  const textoBuscado = normalizarTextoBusqueda(buscador ? buscador.value : "");
-  const titulo = normalizarTextoBusqueda(tarjeta.dataset.titulo || "");
-  const autor = normalizarTextoBusqueda(tarjeta.dataset.autor || "");
-  const textoCoincidente = `${titulo} ${autor}`.trim();
-
-  return textoBuscado === "" || textoCoincidente.includes(textoBuscado);
-}
-
-function obtenerLibrosFiltrados() {
-  const textoBusqueda = buscador ? buscador.value : "";
-  const modoInstitucional = Boolean(checkboxModoInstitucional && checkboxModoInstitucional.checked);
-
-  return tarjetas.filter((tarjeta) => {
-    const coincideBusqueda = coincideConBusqueda(tarjeta);
-    const coincideMateria = coincideConFiltro(tarjeta, "materia");
-    const coincideGrado = coincideConFiltro(tarjeta, "grado");
-    const coincideAnio = coincideConFiltro(tarjeta, "anio");
-    const coincideIdioma = coincideConFiltro(tarjeta, "idioma");
-    const coincideInstitucion = !modoInstitucional || esLibroInstitucional(tarjeta);
-
-    return (
-      coincideBusqueda &&
-      coincideMateria &&
-      coincideGrado &&
-      coincideAnio &&
-      coincideIdioma &&
-      coincideInstitucion
-    );
-  });
-}
-
-function actualizarPaginacionVisual() {
-  const librosFiltrados = obtenerLibrosFiltrados();
-  const totalPaginas = Math.max(1, Math.ceil(librosFiltrados.length / LIBROS_POR_PAGINA));
-
-  estadoCatalogo.paginaActual = Math.min(estadoCatalogo.paginaActual, totalPaginas);
-
-  if (estadoPaginacion) {
-    estadoPaginacion.textContent = librosFiltrados.length === 0 ? "0 / 0" : `${estadoCatalogo.paginaActual} / ${totalPaginas}`;
+  .filter-panel {
+    gap: 8px;
+    padding: 10px;
   }
 
-  if (botonPaginaAnterior) {
-    botonPaginaAnterior.disabled = librosFiltrados.length === 0 || estadoCatalogo.paginaActual === 1;
+  .filter-panel label {
+    font-size: 0.62rem;
   }
 
-  if (botonPaginaSiguiente) {
-    botonPaginaSiguiente.disabled = librosFiltrados.length === 0 || estadoCatalogo.paginaActual >= totalPaginas;
+  .filter-panel input,
+  .filter-panel select,
+  .clear-button {
+    min-height: 36px;
+    font-size: 0.72rem;
+    padding: 0 8px;
   }
 
-  const inicio = (estadoCatalogo.paginaActual - 1) * LIBROS_POR_PAGINA;
-  const fin = inicio + LIBROS_POR_PAGINA;
-  const librosEnPagina = librosFiltrados.slice(inicio, fin);
-  const idsPagina = new Set(librosEnPagina.map((tarjeta) => String(tarjeta.dataset.bookId || tarjeta.dataset.titulo || "")));
-
-  tarjetas.forEach((tarjeta) => {
-    const idTarjeta = String(tarjeta.dataset.bookId || tarjeta.dataset.titulo || "");
-    const debeMostrarse = idsPagina.has(idTarjeta);
-
-    tarjeta.hidden = !debeMostrarse;
-    tarjeta.classList.toggle("is-filtered-out", !debeMostrarse);
-    tarjeta.style.display = debeMostrarse ? "" : "none";
-  });
-
-  const textoBusqueda = buscador ? buscador.value.trim() : "";
-  const modoInstitucional = Boolean(checkboxModoInstitucional && checkboxModoInstitucional.checked);
-  const cantidadVisible = librosFiltrados.length;
-
-  if (resultadoFiltros) {
-    if (modoInstitucional) {
-      if (cantidadVisible === 0) {
-        resultadoFiltros.textContent = "No hay libros de la institución con los filtros actuales.";
-      } else if (cantidadVisible === 1) {
-        resultadoFiltros.textContent = "Mostrando 1 libro de la institución.";
-      } else {
-        resultadoFiltros.textContent = `Mostrando ${cantidadVisible} libros de la institución.`;
-      }
-      return;
-    }
-
-    if (textoBusqueda) {
-      resultadoFiltros.textContent =
-        cantidadVisible === 1
-          ? `Mostrando 1 libro para "${textoBusqueda}".`
-          : `Mostrando ${cantidadVisible} libros para "${textoBusqueda}".`;
-      return;
-    }
-
-    resultadoFiltros.textContent =
-      cantidadVisible === 1
-        ? "Mostrando 1 libro."
-        : `Mostrando ${cantidadVisible} libros.`;
-  }
-}
-
-function aplicarFiltros() {
-  estadoCatalogo.paginaActual = 1;
-  actualizarPaginacionVisual();
-}
-
-function cambiarPagina(direccion) {
-  const librosFiltrados = obtenerLibrosFiltrados();
-  const totalPaginas = Math.max(1, Math.ceil(librosFiltrados.length / LIBROS_POR_PAGINA));
-
-  if (librosFiltrados.length === 0) {
-    return;
+  .book-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
   }
 
-  const siguientePagina = Math.min(totalPaginas, Math.max(1, estadoCatalogo.paginaActual + direccion));
-  estadoCatalogo.paginaActual = siguientePagina;
-  actualizarPaginacionVisual();
-}
-
-tarjetas.forEach((tarjeta) => {
-  const boton = tarjeta.querySelector("[data-read-toggle]");
-  const botonFavorito = tarjeta.querySelector(".favorite-button");
-
-  actualizarTarjeta(tarjeta);
-  actualizarEstadoFavorito(tarjeta);
-
-  boton.addEventListener("click", () => {
-    if (boton.disabled) return;
-
-    const idLibro = tarjeta.dataset.bookId;
-
-    if (librosLeidos.has(idLibro)) {
-      librosLeidos.delete(idLibro);
-    } else {
-      librosLeidos.add(idLibro);
-    }
-
-    guardarSeguimiento();
-    actualizarTarjeta(tarjeta);
-    actualizarResumen();
-
-    boton.disabled = true;
-    window.setTimeout(() => {
-      boton.disabled = false;
-    }, TIEMPO_BLOQUEO_MARCAR);
-  });
-
-  if (botonFavorito) {
-    botonFavorito.addEventListener("click", () => {
-      const datosLibro = construirDatosLibro(tarjeta);
-      alternarFavoritoPorId(datosLibro.id, datosLibro);
-      actualizarEstadoFavorito(tarjeta);
-    });
-  }
-});
-
-if (buscador) {
-  buscador.addEventListener("input", aplicarFiltros);
-}
-
-if (checkboxModoInstitucional) {
-  checkboxModoInstitucional.addEventListener("change", aplicarFiltros);
-}
-
-if (botonFiltrar) {
-  botonFiltrar.addEventListener("click", aplicarFiltros);
-}
-
-if (botonPaginaAnterior) {
-  botonPaginaAnterior.addEventListener("click", () => cambiarPagina(-1));
-}
-
-if (botonPaginaSiguiente) {
-  botonPaginaSiguiente.addEventListener("click", () => cambiarPagina(1));
-}
-
-filtros.forEach((filtro) => {
-  filtro.addEventListener("change", aplicarFiltros);
-});
-
-actualizarPaginacionVisual();
-
-if (botonEstadisticas) {
-  botonEstadisticas.addEventListener("click", abrirEstadisticasLectura);
-}
-
-if (modalEstadisticasCerrar) {
-  modalEstadisticasCerrar.addEventListener("click", cerrarEstadisticasLectura);
-}
-
-if (modalEstadisticas) {
-  modalEstadisticas.addEventListener("click", (evento) => {
-    if (evento.target && evento.target.matches(".favorites-confirm-backdrop")) {
-      cerrarEstadisticasLectura();
-    }
-  });
-}
-
-const formularioPedido = document.querySelector("#pedido-subida-form");
-const estadoPedido = document.querySelector("#pedido-status");
-const botonCorreoAviso = document.querySelector("[data-open-email-request]");
-const DESTINO_CORREO = "juaneolearybibliotecadigital@gmail.com";
-
-function crearEnlaceCorreo({ destinatario = DESTINO_CORREO, asunto = "", cuerpo = "" } = {}) {
-  const url = new URL(`mailto:${destinatario}`);
-
-  if (asunto) {
-    url.searchParams.set("subject", asunto);
+  .book-info {
+    padding: 10px;
   }
 
-  if (cuerpo) {
-    url.searchParams.set("body", cuerpo);
+  .book-info h2 {
+    font-size: 0.82rem;
   }
 
-  return url.toString();
-}
-
-function abrirCorreo({ destinatario = DESTINO_CORREO, asunto = "", cuerpo = "" } = {}) {
-  const mailtoLink = crearEnlaceCorreo({ destinatario, asunto, cuerpo });
-  const gmailLink = new URL("https://mail.google.com/mail/");
-  gmailLink.searchParams.set("view", "cm");
-  gmailLink.searchParams.set("fs", "1");
-  gmailLink.searchParams.set("to", destinatario);
-
-  if (asunto) {
-    gmailLink.searchParams.set("su", asunto);
+  .book-info p {
+    font-size: 0.7rem;
+    line-height: 1.35;
   }
 
-  if (cuerpo) {
-    gmailLink.searchParams.set("body", cuerpo);
+  .tag-list {
+    gap: 4px;
+    margin-bottom: 10px;
   }
 
-  const nuevaVentana = window.open(gmailLink.toString(), "_blank", "noopener,noreferrer");
-
-  if (nuevaVentana) {
-    nuevaVentana.opener = null;
+  .tag-list li {
+    padding: 4px 6px;
+    font-size: 0.58rem;
   }
 
-  setTimeout(() => {
-    window.location.href = mailtoLink;
-  }, 250);
-}
-
-const pedidoModal = document.getElementById("pedido-confirm-modal");
-const pedidoModalMessage = document.getElementById("pedido-confirm-message");
-const pedidoModalCloseButton = document.getElementById("pedido-confirm-close");
-
-function cerrarPedidoModal() {
-  if (!pedidoModal) {
-    return;
+  .book-actions,
+  .favorite-actions {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 
-  pedidoModal.hidden = true;
-  pedidoModal.style.display = "none";
-  pedidoModal.setAttribute("aria-hidden", "true");
-  pedidoModal.classList.remove("is-open");
-}
-
-function mostrarConfirmacionPedido({ correo, nombreLibro, asunto, mensaje }) {
-  if (!pedidoModal || !pedidoModalMessage) {
-    return;
+  .secondary-button,
+  .read-toggle,
+  .favorite-button {
+    min-height: 34px;
+    font-size: 0.68rem;
+    padding: 0 8px;
   }
 
-  const resumen = [
-    "Su pedido a sido enviado correctamente, este sera analizado para posteriormente subirlo a la pagina, este proceso se realizara en fines de semana para evitar problemas en la pagina web",
-    "",
-    "Resumen de la petición",
-    "El cuestionario que se envio",
-    `Correo: ${correo}`,
-    `Libro: ${nombreLibro}`,
-    `Asunto: ${asunto}`,
-    `Detalles: ${mensaje || "Sin detalles adicionales."}`
-  ].join("\n");
-
-  pedidoModalMessage.textContent = resumen;
-  pedidoModal.hidden = false;
-  pedidoModal.style.display = "grid";
-  pedidoModal.setAttribute("aria-hidden", "false");
-  pedidoModal.classList.add("is-open");
-
-  requestAnimationFrame(() => {
-    pedidoModal.hidden = false;
-    pedidoModal.style.display = "grid";
-    pedidoModal.classList.add("is-open");
-  });
-}
-
-async function enviarFormularioPedido(formulario) {
-  const correo = formulario.elements.email.value.trim();
-  const nombreLibro = formulario.elements.book_title.value.trim();
-  const asunto = formulario.elements.subject.value.trim();
-  const archivoInput = formulario.elements.pdf;
-  const archivo = archivoInput ? archivoInput.files[0] : null;
-  const mensaje = formulario.elements.message.value.trim();
-
-  if (!correo || !nombreLibro) {
-    if (estadoPedido) {
-      estadoPedido.textContent = "Completa el correo y el nombre del libro para continuar.";
-    }
-    return { ok: false, motivo: "campos-invalidos" };
+  .favorite-button {
+    grid-column: auto;
   }
 
-  const asuntoFinal = asunto || "Petición de subida de contenido faltante";
-
-  if (estadoPedido) {
-    estadoPedido.textContent = "Enviando la solicitud...";
-  }
-
-  try {
-    const formData = new FormData(formulario);
-    formData.set("subject", asuntoFinal);
-    formData.set("email", correo);
-    formData.set("book_title", nombreLibro);
-    formData.set("message", mensaje || "Sin detalles adicionales.");
-
-    const respuesta = await fetch(formulario.action, {
-      method: "POST",
-      body: formData,
-      headers: {
-        Accept: "application/json"
-      }
-    });
-
-    const textoRespuesta = await respuesta.text();
-    let payload = null;
-
-    try {
-      payload = textoRespuesta ? JSON.parse(textoRespuesta) : null;
-    } catch (error) {
-      payload = null;
-    }
-
-    const envioCorrecto = respuesta.ok && (!payload || payload.ok !== false);
-
-    if (envioCorrecto) {
-      return {
-        ok: true,
-        correo,
-        nombreLibro,
-        asunto: asuntoFinal,
-        mensaje: mensaje || "Sin detalles adicionales."
-      };
-    }
-
-    return {
-      ok: false,
-      motivo: "respuesta-fallida",
-      correo,
-      nombreLibro,
-      asunto: asuntoFinal,
-      mensaje: mensaje || "Sin detalles adicionales.",
-      archivo
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      motivo: "error-red",
-      correo,
-      nombreLibro,
-      asunto: asuntoFinal,
-      mensaje: mensaje || "Sin detalles adicionales.",
-      archivo
-    };
+  .favorite-card {
+    grid-template-columns: 1fr;
   }
 }
-
-if (botonCorreoAviso) {
-  botonCorreoAviso.addEventListener("click", () => {
-    abrirCorreo({
-      destinatario: DESTINO_CORREO,
-      asunto: "Petición de subida de contenido faltante",
-      cuerpo: [
-        "Por favor, adjunte el material o proporcione la referencia del libro solicitado.",
-        "",
-        "Nombre del libro:",
-        "",
-        "Detalles adicionales:"
-      ].join("\n")
-    });
-  });
-}
-
-if (pedidoModalCloseButton) {
-  pedidoModalCloseButton.addEventListener("click", cerrarPedidoModal);
-}
-
-if (pedidoModal) {
-  pedidoModal.addEventListener("click", (evento) => {
-    if (evento.target instanceof HTMLElement && evento.target.dataset.closeModal === "true") {
-      cerrarPedidoModal();
-    }
-  });
-}
-
-if (formularioPedido) {
-  formularioPedido.addEventListener("submit", async (evento) => {
-    evento.preventDefault();
-
-    const resultado = await enviarFormularioPedido(formularioPedido);
-
-    if (resultado.ok) {
-      if (estadoPedido) {
-        estadoPedido.textContent = "Formulario enviado.";
-      }
-
-      mostrarConfirmacionPedido({
-        correo: resultado.correo,
-        nombreLibro: resultado.nombreLibro,
-        asunto: resultado.asunto,
-        mensaje: resultado.mensaje
-      });
-
-      formularioPedido.reset();
-      return;
-    }
-
-    if (estadoPedido) {
-      estadoPedido.textContent = "No se pudo enviar automáticamente. Se abrirá tu correo para completar la solicitud.";
-    }
-
-    const cuerpo = [
-      "Correo del solicitante: " + resultado.correo,
-      "Nombre del libro: " + resultado.nombreLibro,
-      "Asunto: " + resultado.asunto,
-      resultado.archivo ? "PDF adjunto: " + resultado.archivo.name : "PDF: No se adjuntó",
-      "",
-      "Detalles adicionales:",
-      resultado.mensaje || "Sin detalles adicionales."
-    ].join("\n");
-
-    abrirCorreo({
-      destinatario: DESTINO_CORREO,
-      asunto: resultado.asunto,
-      cuerpo
-    });
-
-    formularioPedido.reset();
-  });
-}
-
-Array.from(document.querySelectorAll('[data-email-link], a[href^="mailto:"]')).forEach((enlace) => {
-  enlace.addEventListener("click", (evento) => {
-    evento.preventDefault();
-
-    const href = enlace.getAttribute("href");
-
-    try {
-      const mailtoUrl = new URL(href);
-      const gmailUrl = new URL("https://mail.google.com/mail/");
-      const destinatario = mailtoUrl.pathname || mailtoUrl.searchParams.get("to") || DESTINO_CORREO;
-      const asunto = mailtoUrl.searchParams.get("subject") || "";
-      const cuerpo = mailtoUrl.searchParams.get("body") || "";
-
-      gmailUrl.searchParams.set("view", "cm");
-      gmailUrl.searchParams.set("fs", "1");
-      gmailUrl.searchParams.set("to", destinatario);
-
-      if (asunto) {
-        gmailUrl.searchParams.set("su", asunto);
-      }
-
-      if (cuerpo) {
-        gmailUrl.searchParams.set("body", cuerpo);
-      }
-
-      const ventanaGmail = window.open(gmailUrl.toString(), "_blank", "noopener,noreferrer");
-
-      if (ventanaGmail) {
-        ventanaGmail.opener = null;
-      }
-
-      setTimeout(() => {
-        window.location.href = href;
-      }, 250);
-    } catch (error) {
-      window.location.href = href;
-    }
-  });
-});
-
-  sincronizarCatalogoDesdeInicio();
