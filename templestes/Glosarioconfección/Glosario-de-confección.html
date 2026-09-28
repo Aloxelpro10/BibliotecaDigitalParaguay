@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glosario de Confección</title>
+    <link rel="stylesheet" href="../../static/css/Libro.css">
+    <link rel="stylesheet" href="../../static/css/lector-pdf.css">
+</head>
+<body class="library-page-bg" data-book-id="Glosario" 
+    data-book-info='{"nombre":"Glosario de Confección",
+    "editorial":"McGraw-Hill / Ingebook",
+    "autor":"Desconocido",
+    "fecha":"2026",
+    "idioma":"Español",
+    "paginas":"37 páginas"}'>
+    
+    <section class="toolbar" aria-label="Navegación de regreso">
+        <a href="../../Inicio.html" class="back-button" aria-label="Volver a recomendados">
+            <img src="../../static/img/Back-button.png" alt="Botón volver a recomendados">
+        </a>
+        <h2 class="Title-page">Biblioteca Paraguay</h2>
+        <img src="../../static/img/logo-de-pagina.png" alt="logo-de-pagina" class="logo-de-pagina">
+    </section>
+    <main class="book-detail-layout">
+        <section class="book-detail-card">
+            <div class="book-detail-text">
+                <p class="eyebrow">Glosario de Confección</p>
+                <p class="book-author">Autor: Desconocido</p>
+
+                <!-- Portada exclusiva para móvil (insertada dentro del texto) -->
+                <div class="book-cover book-cover-mobile">
+                    <img src="../../biblioteca_libros/portadas/Glosario de Confección.webp" alt="Portada del libro Glosario de Confección">
+                </div>
+
+                <p class="book-synopsis-title">Sinopsis</p>
+                <p class="book-synopsis">
+                    "Glosario de Confección" ofrece una guía completa para entender los términos y conceptos fundamentales del mundo de la confección. Cubre desde los aspectos básicos de la industria textil hasta los conceptos más avanzados de diseño y producción.
+                </p>
+            </div>
+
+            <!-- Portada exclusiva para escritorio (columna independiente) -->
+            <div class="book-cover book-cover-desktop">
+                <img src="../../biblioteca_libros/portadas/glosario.png " alt="Portada del libro Glosario de Confección)">
+            </div>
+        </section>
+
+        <aside class="book-qr-card">
+            <button id="openQrBtn" class="qr-share-btn" type="button">Mostrar código QR</button>
+            <div class="qr-box">
+                <img id="qrImage" alt="Código QR del libro" />
+            </div>
+            <div class="qr-card-text">
+                <p class="qr-title">Código del libro</p>
+                <div class="qr-actions">
+                    <button id="downloadQrBtn" class="qr-btn" disabled>Descargar QR</button>
+                </div>
+                <p> </p>  
+                <p class="qr-subtitle">Fuente del libro</p>
+                <button class="qr-url" type="button" onclick="window.open('https://www.ingebook.com/ib/NPcd/IB_BooksVis?cod_primaria=1000187&codigo_libro=10211', '_blank', 'noopener,noreferrer')">https://www.ingebook.com</button>
+            </div>
+        </aside>
+    </main>
+    <div class="button-navegation">
+        <button class="favorite-button" type="button" aria-pressed="false">Agregar a favoritos</button>
+        <button id="openBookInfoBtn" class="info-book-button" type="button">Más información</button>
+        <button class="open-book-button" type="button" data-pdf="informatica/Fundamentos%20de%20programacio%CC%81n%205.pdf">Leer</button>
+        <a href="https://biblioteca-r2.williandesiderio3.workers.dev/informatica/Fundamentos%20de%20programacio%CC%81n%205.pdf?download=1">Descargar</a>
+    </div>
+
+    <dialog class="qr-modal" id="qrModal" aria-labelledby="qrModalTitle">
+        <div class="qr-box">
+            <img id="qrModalImage" alt="Código QR de esta página" />
+        </div>
+        <p class="qr-title" id="qrModalTitle">Código QR de esta página</p>
+        <div class="qr-modal-actions">
+            <button id="downloadModalQrBtn" class="qr-btn" type="button" disabled>Descargar QR</button>
+            <button id="closeQrBtn" class="qr-close-btn" type="button">Cerrar</button>
+        </div>
+    </dialog>
+
+    <dialog class="book-info-modal" id="bookInfoModal" aria-labelledby="bookInfoTitle">
+        <div class="book-info-header">
+            <h3 id="bookInfoTitle">Información del libro</h3>
+            <button id="closeBookInfoBtn" class="modal-close-btn" type="button" aria-label="Cerrar información del libro">Cerrar</button>
+        </div>
+
+        <div class="book-info-scroll">
+            <div id="bookInfoContent" class="book-info-content" aria-live="polite"></div>
+        </div>
+    </dialog>
+
+    <!-- Visor PDF universal (se inyecta automáticamente, no necesitas copiarlo en cada página) -->
+    <script src="../../static/js/lector-pdf.js"></script>
+    <script src="../../static/js/book-detail.js"></script>
+</body>
+</html>
