@@ -132,27 +132,25 @@
       </label>
     </div>
 
-    <section class="book-grid" aria-label="Listado de libros">
+    <section class="book-grid" data-catalogo-container data-page-size="20" aria-label="Listado de libros">
       
        <article
         class="book-card"
         data-book-id="Fibras-Textiles-Manofacturadas"
         data-titulo="Fibras Textiles Manofacturadas"
-        data-autor=""
         data-materia="confeccion-industrial"
         data-grado="3a"
         data-anio="2025"
         data-idioma="espanol"
         data-institucion="true"
       >
-        <img src="biblioteca_libros/portadas/Fibras Textiles.png" alt="Portada del libro Fibras Textiles Manofacturadas ">
+        <img src="biblioteca_libros/portadas/Fibras Textiles.png" alt="Portada del libro Fibras Textiles Manofacturadas" loading="lazy" decoding="async>
         <div class="book-info">
           <p class="book-category">Confeción Indutrial</p>
           <h2>Fibras Textiles Manofacturadas</h2>
           <p>Fibras Textiles</p>
           <ul class="tag-list" aria-label="Etiquetas del libro">
             <li>Modelaje</li>
-            <li></li>
             <li>3 curso</li>
             <li>2025</li>
             <li>Español</li>
@@ -175,9 +173,8 @@
         data-grado="3a"
         data-anio="2024"
         data-idioma="espanol"
-        data-institucion="true"
       >
-        <img src="biblioteca_libros/portadas/Fundamentos de la programación 5.webp" alt="Portada del libro Fundamentos de la Programacion">
+        <img src="biblioteca_libros/portadas/Fundamentos de la programación 5.webp" alt="Portada del libro Fundamentos de la Programacion" loading="lazy" decoding="async>
         <div class="book-info">
           <p class="book-category">Informática</p>
           <h2>Fundamentos de la Programacion Vol. 5</h2>
@@ -201,14 +198,15 @@
         class="book-card"
         data-book-id="Glosario"
         data-titulo="Glosario"
-        data-autor=""
-        data-materia="confeccion"
-        data-grado="2"
-        data-anio="2025"
+        data-materia="confeccion-industrial"
+        data-grado="1a"
+        data-grado="2a"
+        data-grado="3a"
+        data-anio="2026"
         data-idioma="espanol"
         data-institucion="true"
       >
-        <img src="biblioteca_libros/portadas/glosario.png" alt="Portada del libro Glosario">
+        <img src="biblioteca_libros/portadas/glosario.png" alt="Portada del libro Glosario" loading="lazy" decoding="async>
         <div class="book-info">
           <p class="book-category">Confección</p>
           <h2>  Glosario </h2>
@@ -227,67 +225,14 @@
           </div>
         </div>
       </article>
-
-      <article
-        class="book-card"
-        data-book-id="ciencias-basicas"
-        data-titulo="Ciencias Basicas"
-        data-autor="prueba"
-        data-materia="ciencias"
-        data-grado="9"
-        data-anio="2024"
-        data-idioma="espanol"
-      >
-        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Ciencias Basicas">
-        <div class="book-info">
-          <p class="book-category">Ciencias</p>
-          <h2>Ciencias Basicas</h2>
-          <p>Contenido introductorio para reforzar temas de biologia, fisica y quimica.</p>
-          <ul class="tag-list" aria-label="Etiquetas del libro">
-            <li>Ciencias</li>
-            <li>Autor: prueba</li>
-            <li>9 grado</li>
-            <li>2024</li>
-            <li>Español</li>
-          </ul>
-          <div class="book-actions">
-            <a class="secondary-button" href="/libros/pdfs/ciencias-basicas.pdf">Ver detalles</a>
-            <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
-            <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
-          </div>
-        </div>
-      </article>
-
-      <article
-        class="book-card"
-        data-book-id="literatura-paraguaya"
-        data-titulo="Literatura Paraguaya"
-        data-autor="prueba"
-        data-materia="literatura"
-        data-grado="2"
-        data-anio="2025"
-        data-idioma="espanol"
-      >
-        <img src="/libros/portadas/placeholder-cover.svg" alt="Portada del libro Literatura Paraguaya">
-        <div class="book-info">
-          <p class="book-category">Literatura</p>
-          <h2>Literatura Paraguaya</h2>
-          <p>Lecturas seleccionadas para conocer autores, movimientos y textos nacionales.</p>
-          <ul class="tag-list" aria-label="Etiquetas del libro">
-            <li>Literatura</li>
-            <li>Autor: prueba</li>
-            <li>2 curso</li>
-            <li>2025</li>
-            <li>Español</li>
-          </ul>
-          <div class="book-actions">
-            <a class="secondary-button" href="/libros/pdfs/literatura-paraguaya.pdf">Ver detalles</a>
-            <button type="button" class="read-toggle" data-read-toggle>Marcar leido</button>
-            <button type="button" class="favorite-button" aria-pressed="false">Favoritos</button>
-          </div>
-        </div>
-      </article>
     </section>
+    
+    <div class="pagination-controls" aria-label="Paginación del catálogo">
+      <button type="button" class="secondary-button pagination-button" data-page-action="prev">Anterior</button>
+      <span class="pagination-status" data-pagination-status>1 / 1</span>
+      <button type="button" class="secondary-button pagination-button" data-page-action="next">Siguiente</button>
+    </div>
+
     <section class="communication-strip" aria-label="Comunicacion con la biblioteca">
       <div>
         <p class="eyebrow">Comunicación</p>
