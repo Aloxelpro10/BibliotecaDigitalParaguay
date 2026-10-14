@@ -500,7 +500,7 @@ a {
 
 .secondary-button {
   color: var(--accent-dark);
-  background: blue;
+  background: #e7f2ee;
 }
 
 .read-toggle {
